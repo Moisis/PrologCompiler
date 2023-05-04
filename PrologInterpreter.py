@@ -1,15 +1,11 @@
 import time
-import tkinter as tk
 from tkinter import *
 from tkinter import ttk, filedialog
 from tkinter.scrolledtext import ScrolledText
 import ctypes
-import graphviz
 from PIL import Image, ImageTk
 from visual_automata.fa.dfa import VisualDFA
-import automata.regex.regex as re
-
-import lol
+import sys
 
 
 def is_file_path_selected(file_path):
@@ -83,6 +79,22 @@ class Editor(object):
 
         self.query_editor.config(wrap="word", undo=True)
 
+
+        # Testinput
+        # Create a Dfa label:
+
+        self.diagraminputlabel = Label(root, text="Test input ", padx=10, pady=1)
+
+        self.diagraminputlabel.grid(sticky=W, row=2, column=2, columnspan=2, pady=3)
+
+
+        self.diagrambox = Text(root, width=77, height=2, padx=10, pady=10)
+
+        self.diagrambox.grid(sticky=W, row=3, column=2, pady=3, padx=10)
+
+        self.diagrambox.config(wrap="word", undo=True)
+
+
         # Create a run button which runs the query against our rules and outputs the
         # results in our solutions text box / editor.
 
@@ -93,32 +105,32 @@ class Editor(object):
             width=20,
             command=self.run_query,
         )
-        self.drawdfabutton = Button(
-            root,
-            text="Draw DFA",
-            height=2,
-            width=20,
-            command=self.draw_DFA,
-        )
-        self.drawparsetree = Button(
-            root,
-            text="Draw Parse tree",
-            height=2,
-            width=20,
-            command=self.draw_ParseTree,
-        )
-        self.lol = Button(
-            root,
-            text="lolbutton",
-            height=2,
-            width=20,
-            command=self.lol,
-        )
+        # self.drawdfabutton = Button(
+        #     root,
+        #     text="Draw DFA",
+        #     height=2,
+        #     width=20,
+        #     command=self.draw_DFA,
+        # )
+        # self.drawparsetree = Button(
+        #     root,
+        #     text="Draw Parse tree",
+        #     height=2,
+        #     width=20,
+        #     command=self.draw_ParseTree,
+        # )
+        # self.lol = Button(
+        #     root,
+        #     text="lolbutton",
+        #     height=2,
+        #     width=20,
+        #     command=self.lol,
+        # )
 
         self.run_button.grid(sticky=E, row=3, column=1, pady=3, padx=10)
-        self.drawdfabutton.grid(sticky=E, row=3, column=2, pady=3, padx=10)
-        self.drawparsetree.grid(sticky=E, row=4, column=2, pady=3, padx=10)
-        self.lol.grid(sticky=E, row=4, column=1, pady=3, padx=10)
+        # self.drawdfabutton.grid(sticky=E, row=3, column=2, pady=3, padx=10)
+        # self.drawparsetree.grid(sticky=E, row=4, column=2, pady=3, padx=10)
+        # self.lol.grid(sticky=E, row=4, column=1, pady=3, padx=10)
 
         # Create a solutions label
 
@@ -148,8 +160,10 @@ class Editor(object):
         self.label1.grid(row=1, column=2)
 
         menu_bar = Menu(root)
+
         # Finally, let's create the file menu
         self.menu_bar = self.create_file_menu(menu_bar)
+        self.menu_bar = self.create_Function_menu(menu_bar)
         self.menu_bar = self.create_options_menu(menu_bar)
 
     def create_file_menu(self, menu_bar):
@@ -185,7 +199,7 @@ class Editor(object):
 
     def create_options_menu(self, menu_bar):
         """Create a menu for night mode  """
-        # menubar = Menu(root)
+
         optionsmenu = Menu(menu_bar, tearoff=0)
 
         optionsmenu.add_command(
@@ -195,6 +209,26 @@ class Editor(object):
             label="ThemeDark", underline=1, command=self.DarkTheme
         )
         menu_bar.add_cascade(label="Options", underline=0, menu=optionsmenu)
+        self.root.config(menu=menu_bar)
+        return menu_bar
+
+    def create_Function_menu(self, menu_bar):
+        """Create a menu for night mode  """
+        # menubar = Menu(root)
+        functionmenu = Menu(menu_bar, tearoff=0)
+
+        functionmenu.add_command(
+            label="Draw final DFA", underline=1, command=self.drawfinalDFA
+        )
+
+        functionmenu.add_command(
+            label="Cycle Through DFA animation", underline=1, command=self.drawStepbystep
+        )
+        functionmenu.add_separator()
+        functionmenu.add_command(
+            label="Draw Parse Tree", underline=1, command=self.draw_ParseTree
+        )
+        menu_bar.add_cascade(label="Functions", underline=0, menu=functionmenu)
         self.root.config(menu=menu_bar)
         return menu_bar
 
@@ -223,27 +257,42 @@ class Editor(object):
         self.label1.config(image=photo1)
         self.label1.image = photo1
 
+    def drawfinalDFA(self):
+        self.solutions_display.delete("1.0", END)
+        self.solutions_display.insert(END, "DFA DRAWN")
+        query_text = self.diagrambox.get(1.0, "end-1c")
+        self.dfa_create(query_text)
+        self.draw_DFA()
+
+        # Picture Holder
+
+        photo1 = ImageTk.PhotoImage(Image.open('test-graphs/Digraph.png'))
+        self.label1.config(image=photo1)
+        self.label1.image = photo1
+
     def draw_ParseTree(self):
         self.solutions_display.delete("1.0", END)
         self.solutions_display.insert(END, "Parse Tree")
 
-    def lol(self):
-        query_text = self.query_editor.get(1.0, "end-1c")
+    def drawStepbystep(self):
+        query_text = self.diagrambox.get(1.0, "end-1c")
         # Create an object instance of class "Foo," called "foo"
         f()
+        query1 = ""
         if f.counter <= len(query_text):
-            query1 = ""
             for i in range(f.counter):
                 query1 = query1 + query_text[i]
                 print(query1)
             self.dfa_create(query1)
+            self.draw_DFA()
+
         else:
-            f.counter=0
+            query_text = self.diagrambox
+            f.counter = 0
+            query1 = ""
             photo1 = ImageTk.PhotoImage(Image.open('test-graphs/original.png'))
             self.label1.config(image=photo1)
             self.label1.image = photo1
-
-
 
     def dfa_create(self, query_text):
         dfa = VisualDFA(
@@ -261,25 +310,17 @@ class Editor(object):
         )
         dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-        self.draw_DFA()
-
     def run_query(self):
         """Interpret the entered rules and query and display the results in the
         solutions text box """
 
-        # Delete all of the text in our solutions display text box
+        # Delete all the text in our solutions display text box
         self.solutions_display.delete("1.0", END)
 
         # Fetch the raw rule / query text entered by the user
         rules_text = self.rule_editor.get(1.0, "end-1c")
         query_text = self.query_editor.get(1.0, "end-1c")
-        print(len(query_text))
-        query1 = ""
-        for i in range(len(query_text)):
-            query1 = query1 + query_text[i]
-            print(query1)
-            self.dfa_create(query1)
-            time.sleep(0.2)
+
 
         # self.dfa_create(query_text)
 
@@ -403,6 +444,6 @@ if __name__ == "__main__":
     # Don't allow users to re-size the editor
     root.resizable(width=FALSE, height=FALSE)
 
-    f =Foo()
+    f = Foo()
 
     root.mainloop()
