@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk, filedialog
@@ -6,6 +7,9 @@ import ctypes
 import graphviz
 from PIL import Image, ImageTk
 from visual_automata.fa.dfa import VisualDFA
+import automata.regex.regex as re
+
+import lol
 
 
 def is_file_path_selected(file_path):
@@ -19,6 +23,13 @@ def get_file_contents(file_path):
         file_contents = f.read()
 
     return file_contents
+
+
+class Foo(object):
+    counter = 0
+
+    def __call__(self):
+        Foo.counter += 1
 
 
 class Editor(object):
@@ -101,7 +112,7 @@ class Editor(object):
             text="lolbutton",
             height=2,
             width=20,
-            command=print("Still in progress"),
+            command=self.lol,
         )
 
         self.run_button.grid(sticky=E, row=3, column=1, pady=3, padx=10)
@@ -128,6 +139,13 @@ class Editor(object):
         self.solutions_display.grid(
             row=5, column=0, columnspan=2, padx=10, pady=7
         )
+
+        image = Image.open('test-graphs/original.png')
+        photo = ImageTk.PhotoImage(image)
+
+        self.label1 = Label(root, image=photo)
+        self.label1.image = photo
+        self.label1.grid(row=1, column=2)
 
         menu_bar = Menu(root)
         # Finally, let's create the file menu
@@ -198,36 +216,36 @@ class Editor(object):
     def draw_DFA(self):
         self.solutions_display.delete("1.0", END)
         self.solutions_display.insert(END, "DFA DRAWN")
-        graph = graphviz.Source.from_file('Digraph.gv')
 
-        # render the graph to a PNG image file
-        png_file = 'output'
-        graph.render(png_file, format='png', cleanup=True)
         # Picture Holder
-        self.image = Image.open('output.png')
-        self.photo = ImageTk.PhotoImage(self.image)
 
-        self.label1 = Label(root, image=self.photo)
-        self.label1.image = self.photo
-        self.label1.grid(row=1, column=2)
+        photo1 = ImageTk.PhotoImage(Image.open('test-graphs/Digraph.png'))
+        self.label1.config(image=photo1)
+        self.label1.image = photo1
 
     def draw_ParseTree(self):
         self.solutions_display.delete("1.0", END)
         self.solutions_display.insert(END, "Parse Tree")
 
-    def run_query(self):
-        """Interpret the entered rules and query and display the results in the
-        solutions text box """
-
-        # Delete all of the text in our solutions display text box
-        self.solutions_display.delete("1.0", END)
-
-        # self.set_busy()
-
-        # Fetch the raw rule / query text entered by the user
-        rules_text = self.rule_editor.get(1.0, "end-1c")
+    def lol(self):
         query_text = self.query_editor.get(1.0, "end-1c")
+        # Create an object instance of class "Foo," called "foo"
+        f()
+        if f.counter <= len(query_text):
+            query1 = ""
+            for i in range(f.counter):
+                query1 = query1 + query_text[i]
+                print(query1)
+            self.dfa_create(query1)
+        else:
+            f.counter=0
+            photo1 = ImageTk.PhotoImage(Image.open('test-graphs/original.png'))
+            self.label1.config(image=photo1)
+            self.label1.image = photo1
 
+
+
+    def dfa_create(self, query_text):
         dfa = VisualDFA(
             states={"q0", "q1", "q2", "q3", "q4"},
             input_symbols={"0", "1"},
@@ -241,7 +259,29 @@ class Editor(object):
             initial_state="q0",
             final_states={"q2", "q4"},
         )
-        dfa.show_diagram(query_text, format_type='.gv', view=True)
+        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+
+        self.draw_DFA()
+
+    def run_query(self):
+        """Interpret the entered rules and query and display the results in the
+        solutions text box """
+
+        # Delete all of the text in our solutions display text box
+        self.solutions_display.delete("1.0", END)
+
+        # Fetch the raw rule / query text entered by the user
+        rules_text = self.rule_editor.get(1.0, "end-1c")
+        query_text = self.query_editor.get(1.0, "end-1c")
+        print(len(query_text))
+        query1 = ""
+        for i in range(len(query_text)):
+            query1 = query1 + query_text[i]
+            print(query1)
+            self.dfa_create(query1)
+            time.sleep(0.2)
+
+        # self.dfa_create(query_text)
 
         # # Create a new solver so we can try to query for solutions.
         # try:
@@ -355,12 +395,14 @@ class Editor(object):
 if __name__ == "__main__":
     root = Tk()
     root.tk.call("source", "Themes/azure.tcl")
-    root.tk.call("set_theme", "light")
+    root.tk.call("set_theme", "dark")
     editor = Editor(root)
     root.iconbitmap("assets/icons8-python-96.ico")
     myappid = 'PrologInterpreter'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     # Don't allow users to re-size the editor
     root.resizable(width=FALSE, height=FALSE)
+
+    f =Foo()
 
     root.mainloop()
