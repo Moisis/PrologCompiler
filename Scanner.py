@@ -74,36 +74,73 @@ Operators = {".": Token_type.Dot,
              }
 Tokens = []  # to add tokens to list
 
-def slit_token(text):
+def split_token(text):
     word1 =[]
     temp = ""
-    for word in text:
-        if not(word in ReservedWords) and not(word in Operators) :
-            temp=temp + word
-        elif (word == ":" or word =="-"):
-            if(word ==":"):
-                continue
-            word1.append(":-")
-            temp=""
-        else:
-            if len(temp) >0:
+    colonFlag = False
+    greaterThanFLag = False
+    smallerThanFlag = False
+
+    for char in text:
+        if colonFlag:
+            if temp != "":
                 word1.append(temp)
-            word1.append(word)
-            if(word == ')'):
-               word1.append(text)
-            temp =""
-    if len(temp)>0:
+                temp = ""
+            if char == '-':
+                word1.append(":-")
+            else:
+                word1.append(":")
+                temp = temp + char
+            colonFlag = False
+
+        elif greaterThanFLag:
+            if temp != "":
+                word1.append(temp)
+                temp = ""
+            if char == '=':
+                word1.append(">=")
+                temp = ""
+            else:
+                word1.append(">")
+            greaterThanFLag = False
+
+        elif smallerThanFlag:
+            if temp != "":
+                word1.append(temp)
+                temp = ""
+            if char == '=':
+                word1.append("<=")
+            else:
+                word1.append("<")
+            smallerThanFlag = False
+
+        elif char in ReservedWords:
+            if temp != "":
+                word1.append(temp)
+                temp =""
+            word1.append(char)
+        elif char == ':':
+            colonFlag = True
+            continue
+        elif char == ">":
+            greaterThanFLag = True
+        elif char == "<":
+            smallerThanFlag = True
+        elif char in Operators:
+            if temp != "":
+                word1.append(temp)
+                temp =""
+            word1.append(char)
+        else:
+            temp = temp + char
+    if len(temp) > 0:
         word1.append(temp)
     return word1
 
 
-# if word == ReservedWords or word == Operators:
-#     if len(temp) > 0:
-#         word1.append(word)
-
 
 def find_token(text):
-   tokens = slit_token(text)
+   tokens = split_token(text)
    for word in tokens:
     if word in ReservedWords:
         print("is Reserved word")
@@ -111,7 +148,7 @@ def find_token(text):
     elif word in Operators:
         print(" is operator")
         Tokens.append(token(word, Operators[word]))
-    elif re.match("^[A-Z _][a-z A-Z 0-9]*$", word):
+    elif re.match("^[A-Z _][a-z A-Z 0-9 _]*$", word):
         print("is Identifier")
         Tokens.append(token(word, Token_type.Identifier))
     elif re.match("^[0-9]+$", word):
