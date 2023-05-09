@@ -1,3 +1,4 @@
+import os
 import time
 from tkinter import *
 from tkinter import ttk, filedialog
@@ -5,7 +6,7 @@ from tkinter.scrolledtext import ScrolledText
 import ctypes
 from PIL import Image, ImageTk
 from visual_automata.fa.dfa import VisualDFA
-import sys
+import Scanner
 
 
 def is_file_path_selected(file_path):
@@ -21,19 +22,14 @@ def get_file_contents(file_path):
     return file_contents
 
 
-class Foo(object):
-    counter = 0
-
-    def __call__(self):
-        Foo.counter += 1
-
-
 class Editor(object):
     def __init__(self, root_):
 
         self.root = root_
         self.file_path = None
         self.root.title("Prolog Interpreter")
+        self.lol = 0
+        self.lol2 = 0
 
         # Create a rule label
 
@@ -79,21 +75,17 @@ class Editor(object):
 
         self.query_editor.config(wrap="word", undo=True)
 
-
         # Testinput
-        # Create a Dfa label:
 
         self.diagraminputlabel = Label(root, text="Test input ", padx=10, pady=1)
 
         self.diagraminputlabel.grid(sticky=W, row=2, column=2, columnspan=2, pady=3)
 
-
-        self.diagrambox = Text(root, width=77, height=2, padx=10, pady=10)
+        self.diagrambox = Text(root, width=40, height=2, padx=10, pady=10)
 
         self.diagrambox.grid(sticky=W, row=3, column=2, pady=3, padx=10)
 
         self.diagrambox.config(wrap="word", undo=True)
-
 
         # Create a run button which runs the query against our rules and outputs the
         # results in our solutions text box / editor.
@@ -105,13 +97,13 @@ class Editor(object):
             width=20,
             command=self.run_query,
         )
-        # self.drawdfabutton = Button(
-        #     root,
-        #     text="Draw DFA",
-        #     height=2,
-        #     width=20,
-        #     command=self.draw_DFA,
-        # )
+        self.drawdfabutton = Button(
+            root,
+            text="Start Animation",
+            height=2,
+            width=30,
+            command=self.drawStepbystep,
+        )
         # self.drawparsetree = Button(
         #     root,
         #     text="Draw Parse tree",
@@ -119,18 +111,18 @@ class Editor(object):
         #     width=20,
         #     command=self.draw_ParseTree,
         # )
-        # self.lol = Button(
-        #     root,
-        #     text="lolbutton",
-        #     height=2,
-        #     width=20,
-        #     command=self.lol,
-        # )
+        self.resetanima= Button(
+            root,
+            text="Reset Diagram",
+            height=2,
+            width=20,
+            command=self.resetanimation,
+        )
 
         self.run_button.grid(sticky=E, row=3, column=1, pady=3, padx=10)
-        # self.drawdfabutton.grid(sticky=E, row=3, column=2, pady=3, padx=10)
+        self.drawdfabutton.grid(sticky=E, row=3, column=2, pady=3, padx=10)
         # self.drawparsetree.grid(sticky=E, row=4, column=2, pady=3, padx=10)
-        # self.lol.grid(sticky=E, row=4, column=1, pady=3, padx=10)
+        self.resetanima.grid(sticky=E, row=3, column=3, pady=3, padx=10)
 
         # Create a solutions label
 
@@ -169,8 +161,6 @@ class Editor(object):
     def create_file_menu(self, menu_bar):
         """Create a menu which will allow us to open / save our Prolog rules, run our
         query, and exit our editor interface """
-
-        # menu_bar = Menu(root)
 
         file_menu = Menu(menu_bar, tearoff=0)
 
@@ -274,25 +264,29 @@ class Editor(object):
         self.solutions_display.delete("1.0", END)
         self.solutions_display.insert(END, "Parse Tree")
 
+    def resetanimation(self):
+        photo1 = ImageTk.PhotoImage(Image.open('test-graphs/original.png'))
+        self.label1.config(image=photo1)
+        self.label1.image = photo1
     def drawStepbystep(self):
+        # f()
+        self.lol += 1
         query_text = self.diagrambox.get(1.0, "end-1c")
-        # Create an object instance of class "Foo," called "foo"
-        f()
-        query1 = ""
-        if f.counter <= len(query_text):
-            for i in range(f.counter):
-                query1 = query1 + query_text[i]
-                print(query1)
-            self.dfa_create(query1)
-            self.draw_DFA()
+        if self.lol > (len(query_text)):
+                self.lol = 0
+
 
         else:
-            query_text = self.diagrambox
-            f.counter = 0
             query1 = ""
-            photo1 = ImageTk.PhotoImage(Image.open('test-graphs/original.png'))
-            self.label1.config(image=photo1)
-            self.label1.image = photo1
+            for i in range(self.lol):
+                query1 = query1 + query_text[i]
+                print(query1)
+                self.dfa_create(query1)
+                self.draw_DFA()
+            time.sleep(0.8)
+            root.update()
+            self.drawStepbystep()
+
 
     def dfa_create(self, query_text):
         dfa = VisualDFA(
@@ -321,10 +315,11 @@ class Editor(object):
         rules_text = self.rule_editor.get(1.0, "end-1c")
         query_text = self.query_editor.get(1.0, "end-1c")
 
+        tokenline = rules_text.split('\n')
+        for line in tokenline:
+            Scanner.Scan(line)
 
-        # self.dfa_create(query_text)
-
-        # # Create a new solver so we can try to query for solutions.
+        # # Create a new solver, so we can try to query for solutions.
         # try:
         #     solver = Solver(rules_text)
         # except Exception as e:
@@ -436,7 +431,7 @@ class Editor(object):
 if __name__ == "__main__":
     root = Tk()
     root.tk.call("source", "Themes/azure.tcl")
-    root.tk.call("set_theme", "dark")
+    root.tk.call("set_theme", "light")
     editor = Editor(root)
     root.iconbitmap("assets/icons8-python-96.ico")
     myappid = 'PrologInterpreter'  # arbitrary string
@@ -444,6 +439,5 @@ if __name__ == "__main__":
     # Don't allow users to re-size the editor
     root.resizable(width=FALSE, height=FALSE)
 
-    f = Foo()
 
     root.mainloop()
