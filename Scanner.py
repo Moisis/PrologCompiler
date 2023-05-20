@@ -36,6 +36,22 @@ class Token_type(Enum):  # listing all tokens type
     predicate =21
     predicate_name = 22
     Error =23
+    notEqual = 24
+    clause= 25
+    goal=26
+    integer=27
+    real=28
+    string=29
+    char=30
+    symbol=31
+    anonymous=32
+    readString=33
+    readint=34
+    readchar=35
+    write=36
+
+
+
 
 
 
@@ -54,23 +70,43 @@ class token:
 
 # Reserved word Dictionary
 ReservedWords = {":-": Token_type.If,
-                 ".": Token_type.End,
-                 "," : Token_type.And,
+                ".": Token_type.End,
+                 ",": Token_type.And,
                  ";": Token_type.Or,
-                 "Not":Token_type.Not,
-                 "("  :Token_type.openBracket,
-                 ")"  :Token_type.closeBracket
+                 "(": Token_type.openBracket,
+                 ")": Token_type.closeBracket,
+                 "Not": Token_type.Not,
+                "Predicate" : Token_type.predicate,
+                "Clause" : Token_type.clause,
+                "Goal" : Token_type.goal,
+                "int" : Token_type.integer,
+                "real" : Token_type.real,
+                "string" : Token_type.string,
+                 "char" : Token_type.char,
+                 "symbol" : Token_type.symbol,
+                 "_" : Token_type.anonymous,
+                 "readln": Token_type.readString,
+                 "readint":  Token_type.readint,
+                 "readchar": Token_type.readchar,
+                 "write": Token_type.write,
+
+
+
                  }
 Operators = {".": Token_type.Dot,
              "=": Token_type.AssignOp,
              "+": Token_type.PlusOp,
              "-": Token_type.MinusOp,
-             "*": Token_type.MultiplyOp,
              "/": Token_type.DivideOp,
+             "*": Token_type.MultiplyOp,
              ">": Token_type.greaterThan,
-             "<":Token_type.smallerThan,
-             ">=":Token_type.greaterOrEqual,
-             "<=":Token_type.smallerOrEqual
+             "<": Token_type.smallerThan,
+             ">=": Token_type.greaterOrEqual,
+             "<=": Token_type.smallerOrEqual,
+             "<>": Token_type.notEqual  ####
+
+
+
              }
 Tokens = []  # to add tokens to list
 

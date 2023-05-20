@@ -29,6 +29,7 @@ class Editor(object):
         self.file_path = None
         self.root.title("Prolog Interpreter")
         self.lol = 0
+        self.lol = 0
         self.lol2 = 0
 
         # Create a rule label
