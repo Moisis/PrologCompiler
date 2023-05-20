@@ -30,31 +30,26 @@ class Token_type(Enum):  # listing all tokens type
     smallerThan = 15
     greaterOrEqual = 16
     smallerOrEqual = 17
-    Identifier =18
-    Constant =19
+    Identifier = 18
+    Constant = 19
     Real = 20
-    predicate =21
+    predicate = 21
     predicate_name = 22
-    Error =23
+    Error = 23
     notEqual = 24
-    clause= 25
-    goal=26
-    integer=27
-    real=28
-    string=29
-    char=30
-    symbol=31
-    anonymous=32
-    readString=33
-    readint=34
-    readchar=35
-    write=36
-
-
-
-
-
-
+    clause = 25
+    goal = 26
+    integer = 27
+    real = 28
+    string = 29
+    char = 30
+    symbol = 31
+    anonymous = 32
+    readString = 33
+    readint = 34
+    readchar = 35
+    write = 36
+    value = 37
 # class token to hold string and token type
 class token:
     def __init__(self, lex, token_type):
@@ -76,15 +71,15 @@ ReservedWords = {":-": Token_type.If,
                  "(": Token_type.openBracket,
                  ")": Token_type.closeBracket,
                  "Not": Token_type.Not,
-                "Predicate" : Token_type.predicate,
-                "Clause" : Token_type.clause,
-                "Goal" : Token_type.goal,
-                "int" : Token_type.integer,
-                "real" : Token_type.real,
-                "string" : Token_type.string,
-                 "char" : Token_type.char,
-                 "symbol" : Token_type.symbol,
-                 "_" : Token_type.anonymous,
+                "Predicate": Token_type.predicate,
+                "Clause": Token_type.clause,
+                "Goal": Token_type.goal,
+                "int": Token_type.integer,
+                "real": Token_type.real,
+                "string": Token_type.string,
+                 "char": Token_type.char,
+                 "symbol": Token_type.symbol,
+                 # "_": Token_type.anonymous,
                  "readln": Token_type.readString,
                  "readint":  Token_type.readint,
                  "readchar": Token_type.readchar,
@@ -146,27 +141,44 @@ def split_token(text):
                 temp = ""
             if char == '=':
                 word1.append("<=")
+            elif char == '>':
+                word1.append("<>")
             else:
                 word1.append("<")
             smallerThanFlag = False
 
         elif char in ReservedWords:
             if temp != "":
+                if char=='(':
+                    if not (temp in ReservedWords):
+                        temp=temp+char
                 word1.append(temp)
                 temp =""
             word1.append(char)
+
         elif char == ':':
             colonFlag = True
             continue
+
         elif char == ">":
             greaterThanFLag = True
         elif char == "<":
             smallerThanFlag = True
+
         elif char in Operators:
             if temp != "":
                 word1.append(temp)
                 temp =""
             word1.append(char)
+
+                                                ######ELDOT WEL END
+        # elif char=='.':
+        #     if temp != "":
+        #         temp = temp + char
+        #         continue
+        #     else:
+        #         word1.append(char)
+
         else:
             temp = temp + char
     if len(temp) > 0:
@@ -193,12 +205,16 @@ def find_token(text):
     elif re.match("^[0-9]+\.[0-9]*$", word):
         print("is real")
         Tokens.append(token(word, Token_type.Real))
-    elif re.match("^[a-z A-Z][a-z A-Z 0-9]*[(][a-z A-Z 0-9]+(,[a-z A-Z 0-9]+)*[)]",word):
-        print("is predicate")
-        Tokens.append(token(word, Token_type.predicate))
-    elif re.match("[a-z]+", word):
+    # elif re.match("^[a-z A-Z][a-z A-Z 0-9]*[(][a-z A-Z 0-9]+(,[a-z A-Z 0-9]+)*[)]",word):
+    #     print("is predicate")
+    #     Tokens.append(token(word, Token_type.predicate))
+    elif re.match("^[a-z]+[(]$", word):
         print("is predicate name")
+        word=word[:-1]
         Tokens.append(token(word, Token_type.predicate_name))
+    elif re.match("^[a-z]+[A-Z a-z 0-9]*$", word):
+        print("is value")
+        Tokens.append(token(word, Token_type.value))
     else:
         Tokens.append(token(word, Token_type.Error))
     # complete
