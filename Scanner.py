@@ -7,7 +7,16 @@
 import tkinter as tk
 from enum import Enum
 import re
+import pandas
+import pandastable as pt
+from nltk.tree import*
+from enum import Enum
+import re
 from tkinter.scrolledtext import ScrolledText
+
+
+
+
 
 import pandas
 
@@ -104,6 +113,7 @@ Operators = {".": Token_type.Dot,
 
              }
 Tokens = []  # to add tokens to list
+errors=[]
 
 def split_token(text):
     word1 =[]
@@ -217,7 +227,163 @@ def find_token(text):
         Tokens.append(token(word, Token_type.value))
     else:
         Tokens.append(token(word, Token_type.Error))
-    # complete
+
+                                                    ########## GRAMMAR ################
+
+def Parse():
+    j = 0
+    Children = []
+    Predicate_dict = Predicate(j)
+    Children.append(Predicate_dict["node"])  ###############
+    # dic_output = Match(Token_type.Dot, Predicate_dict["index"])
+    # Children.append(dic_output["node"])
+    Node = Tree('Program', Children)
+
+    return Node
+
+def Predicate(j):
+    children = []
+    output=dict()
+
+    # out=Match(Token_type.Predicate,j)
+    # children.append(out["node"])    out["index"]
+    Pre_dict = Pre(j)
+    children.append(Pre_dict["node"])
+    # out1=Match(Token_type.Identifier,j)
+    # children.append(out1["node"])
+    Node = Tree('Predicate',children)
+    output["node"]=Node
+    output["index"]=Pre_dict["index"]                    # out["index"]
+
+    return output
+def Pre(j):
+    output = dict()
+    children = []
+    out=Match(Token_type.predicate_name,j)
+    children.append(out["node"])
+    out1=Match(Token_type.openBracket,out["index"])
+    children.append(out1["node"])
+    Pl_dict=Pl(out1["index"])
+    children.append(Pl_dict["node"])
+    out2=Match(Token_type.closeBracket,Pl_dict["index"])
+    children.append(out2["node"])
+    out3=Match(Token_type.End,out2["index"])
+    children.append(out3["node"])
+    Node = Tree('Pre', children)
+    output["node"] = Node
+    output["index"] = out3["index"]
+    return output
+def Pl(j):
+     output = dict()
+     children = []
+     temp=Tokens[j+1].to_dict()
+
+     if(temp['token_type'] == Token_type.And):
+        Data_dict=Data(j)
+        children.append(Data_dict["node"])
+        out = Match(Token_type.And, Data_dict["index"])
+        children.append(out["node"])
+        X_dict = X(out["index"])
+        children.append(X_dict["node"])
+        Node = Tree('Pl', children)
+        output["node"] = Node
+        output["index"] = X_dict["index"]
+        return output
+     else:
+        Data_dict = Data(j)
+        children.append(Data_dict["node"])
+        Node = Tree('Pl', children)
+        output["node"] = Node
+        output["index"] = Data_dict["index"]
+        return output
+def X(j):
+    output = dict()
+    children = []
+    Pl_dict = Pl(j)
+    children.append(Pl_dict["node"])
+    Node = Tree('X', children)
+    output["node"] = Node
+    output["index"] = Pl_dict["index"]
+    return output
+def Data(j):
+    output = dict()
+    children = []
+    temp = Tokens[j].to_dict()
+    if temp == Token_type.string:
+        out1 = Match(Token_type.string, j)
+        children.append(out1["node"])
+        Node = Tree('Data', children)
+        output["node"] = Node
+        output["index"] = out1["index"]
+        return output
+    elif temp == Token_type.integer:
+        out = Match(Token_type.integer, j)
+        children.append(out["node"])
+        Node = Tree('Data', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+
+    elif temp == Token_type.real :
+        out2 = Match(Token_type.real, j)
+        children.append(out2["node"])
+        Node = Tree('Data', children)
+        output["node"]=Node
+        output["index"]=out2["index"]
+        return output
+    elif temp == Token_type.symbol:
+        out3 = Match(Token_type.symbol, j)
+        children.append(out3["node"])
+        Node = Tree('Data', children)
+        output["node"]=Node
+        output["index"]=out3["index"]
+        return output
+    elif temp==Token_type.char:
+        out4 = Match(Token_type.symbol, j)
+        children.append(out4["node"])
+        Node = Tree('Data', children)
+        output["node"] = Node
+        output["index"] = out4["index"]
+        return output
+    else:
+        out = Match(Token_type.integer, j)
+        children.append(out["node"])
+        Node = Tree('Data', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+
+########################
+def Header(j):
+    output=dict()
+    children=[]
+    # out=Match(Token_type.Program,j)
+    # children.append(out["node"])
+    out1=Match(Token_type.Identifier,j)
+    children.append(out1["node"])
+    Node = Tree('Header',children)
+    output["node"]=Node
+    output["index"]=out1["index"]
+    return output
+
+def Match(a, j):
+    output = dict()
+    if (j < len(Tokens)):
+        Temp = Tokens[j].to_dict()
+        if (Temp['token_type'] == a):
+            j += 1
+            output["node"] = [Temp['Lex']]
+            output["index"] = j
+            return output
+        else:
+            output["node"] = ["error"]
+            output["index"] = j + 1
+            errors.append("Syntax error : " + Temp['Lex'] + " Expected dot")
+            return output
+    else:
+        output["node"] = ["error"]
+        output["index"] = j + 1
+        return output
 
 
 # GUI
@@ -242,23 +408,88 @@ def Scan():
     x1 = entry1.get()
     find_token(x1)
     df = pandas.DataFrame.from_records([t.to_dict() for t in Tokens])
-    print(df)
-    label3 = tk.Label(root, text='Lexem ' + x1 + ' is:', font=('helvetica', 10))
-    canvas1.create_window(200, 210, window=label3)
+    # print(df)
 
-    label4 = tk.Label(root, text="Token_type" + x1, font=('helvetica', 10, 'bold'))
-    canvas1.create_window(200, 230, window=label4)
-    # rule_editor = ScrolledText(
-    #     root, width=100, height=30, padx=10, pady=10
-    # )
-    # # diagrambox = tk.Text(root, padx=10, pady=10)
-    # # diagrambox.grid(sticky=W, row=3, column=2, pady=3, padx=10)
-    # canvas1.create_window(190, 240, window=rule_editor)
+    # to display token stream as table
+    dTDa1 = tk.Toplevel()
+    dTDa1.title('Token Stream')
+    dTDaPT = pt.Table(dTDa1, dataframe=df, showtoolbar=True, showstatusbar=True)
+    dTDaPT.show()
+    # start Parsing
+    Node = Parse()
+
+    # to display errorlist
+    df1 = pandas.DataFrame(errors)
+    dTDa2 = tk.Toplevel()
+    dTDa2.title('Error List')
+    dTDaPT2 = pt.Table(dTDa2, dataframe=df1, showtoolbar=True, showstatusbar=True)
+    dTDaPT2.show()
+    Node.draw()
+    # clear your list
+
+    # label3 = tk.Label(root, text='Lexem ' + x1 + ' is:', font=('helvetica', 10))
+    # canvas1.create_window(200, 210, window=label3)
+
+    # label4 = tk.Label(root, text="Token_type"+x1, font=('helvetica', 10, 'bold'))
+    # canvas1.create_window(200, 230, window=label4)
+
 
 button1 = tk.Button(text='Scan', command=Scan, bg='brown', fg='white', font=('helvetica', 9, 'bold'))
 canvas1.create_window(200, 180, window=button1)
-
 root.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # GUI
+# root = tk.Tk()
+#
+# canvas1 = tk.Canvas(root, width=400, height=300, relief='raised')
+# canvas1.pack()
+#
+# label1 = tk.Label(root, text='Scanner Phase')
+# label1.config(font=('helvetica', 14))
+# canvas1.create_window(200, 25, window=label1)
+#
+# label2 = tk.Label(root, text='Source code:')
+# label2.config(font=('helvetica', 10))
+# canvas1.create_window(200, 100, window=label2)
+#
+# entry1 = tk.Entry(root)
+# canvas1.create_window(200, 140, window=entry1)
+#
+#
+# def Scan():
+#     x1 = entry1.get()
+#     find_token(x1)
+#     df = pandas.DataFrame.from_records([t.to_dict() for t in Tokens])
+#     print(df)
+#     label3 = tk.Label(root, text='Lexem ' + x1 + ' is:', font=('helvetica', 10))
+#     canvas1.create_window(200, 210, window=label3)
+#
+#     label4 = tk.Label(root, text="Token_type" + x1, font=('helvetica', 10, 'bold'))
+#     canvas1.create_window(200, 230, window=label4)
+#     # rule_editor = ScrolledText(
+#     #     root, width=100, height=30, padx=10, pady=10
+#     # )
+#     # # diagrambox = tk.Text(root, padx=10, pady=10)
+#     # # diagrambox.grid(sticky=W, row=3, column=2, pady=3, padx=10)
+#     # canvas1.create_window(190, 240, window=rule_editor)
+#
+# button1 = tk.Button(text='Scan', command=Scan, bg='brown', fg='white', font=('helvetica', 9, 'bold'))
+# canvas1.create_window(200, 180, window=button1)
+#
+# root.mainloop()
 
 # In[ ]:
 
