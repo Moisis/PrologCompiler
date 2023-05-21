@@ -6,7 +6,6 @@ from tkinter.scrolledtext import ScrolledText
 import ctypes
 from PIL import Image, ImageTk
 from visual_automata.fa.dfa import VisualDFA
-import Scanner
 
 
 def is_file_path_selected(file_path):
@@ -112,7 +111,7 @@ class Editor(object):
         #     width=20,
         #     command=self.draw_ParseTree,
         # )
-        self.resetanima= Button(
+        self.resetanima = Button(
             root,
             text="Reset Diagram",
             height=2,
@@ -219,6 +218,27 @@ class Editor(object):
         functionmenu.add_command(
             label="Draw Parse Tree", underline=1, command=self.draw_ParseTree
         )
+        functionmenu.add_separator()
+        functionmenu.add_command(
+            label="dfa_arithmetic_create", underline=1, command=self.dfa_arithmetic_create
+        )
+
+        functionmenu.add_command(
+            label="dfa_relational_create", underline=1, command=self.dfa_relational_create
+        )
+        functionmenu.add_command(
+            label="dfa_integer_create", underline=1, command=self.dfa_integer_create
+        )
+        functionmenu.add_command(
+            label="dfa_real_create", underline=1, command=self.dfa_real_create
+        )
+        functionmenu.add_command(
+            label="dfa_variable_create", underline=1, command=self.dfa_variable_create
+        )
+        functionmenu.add_command(
+            label="dfa_comment_create", underline=1, command=self.dfa_comment_create
+        )
+
         menu_bar.add_cascade(label="Functions", underline=0, menu=functionmenu)
         self.root.config(menu=menu_bar)
         return menu_bar
@@ -269,12 +289,13 @@ class Editor(object):
         photo1 = ImageTk.PhotoImage(Image.open('test-graphs/original.png'))
         self.label1.config(image=photo1)
         self.label1.image = photo1
+
     def drawStepbystep(self):
         # f()
         self.lol += 1
         query_text = self.diagrambox.get(1.0, "end-1c")
         if self.lol > (len(query_text)):
-                self.lol = 0
+            self.lol = 0
 
 
         else:
@@ -287,7 +308,6 @@ class Editor(object):
             time.sleep(0.8)
             root.update()
             self.drawStepbystep()
-
 
     def dfa_create(self, query_text):
         dfa = VisualDFA(
@@ -305,49 +325,62 @@ class Editor(object):
         )
         dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-    def dfa_arithmetic_create(self, query_text):
+    def dfa_arithmetic_create(self):
         dfa = VisualDFA(
-            #[A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
+            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "qD"},
-            input_symbols={"* / + -", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]"},
+            # input_symbols={"* / + -", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]"},
+            input_symbols={"* | / | + | -", "[A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | ="},
             transitions={
-                "q0": {"* / + -": "q1", "[A-Z a-z 0-9 . ; : _ % ( ) < > = ]": "qD"},
-                "q1": {"* / + -": "qD", "[A-Z a-z  0-9 . ; : _ % ( ) < > = ]": "qD"},
-                "qD": {"* / + -": "qD", "[A-Z a-z  0-9 . ; : _ % ( ) < > = ]": "qD"},
+                # "q0": {"* / + -": "q1", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]": "qD"},
+                # "q1": {"* / + -": "qD", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]": "qD"},
+                # # "qD": {"* / + -": "qD", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]": "qD"},
 
+                "q0": {"* | / | + | -": "q1", "[A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+                "q1": {"* | / | + | -": "qD", "[A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+                "qD": {"* | / | + | -": "qD", "[A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+                # "q0": {"a": "q1", "b": "qD"},
+                # "q1": {"a": "qD", "b": "qD"},
+                # "qD": {"a": "qD", "b": "qD"},
             },
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(input_str="", filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-    def dfa_relational_create(self, query_text):
+        self.draw_DFA()
+
+    def dfa_relational_create(self):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
-            states={"q0", "q1", "q2", "q3", "qD"},
-            input_symbols={"<", ">", "=",  "[A-Za-z * - + / ; : _ % ( ) . ]"},
+            states={"q0", "q1", "q2", "q3", "q4", "q5", "qD"},
+            input_symbols={"<", ">", "=", "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . "},
             transitions={
-                "q0": {"<": "q1", ">": "q3", "=": "q2", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
-                "q1": {"<": "qD", ">": "q4", "=": "q4", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
-                "q2": {"<": "qD", ">": "qD", "=": "qD", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
-                "q3": {"<": "qD", ">": "qD", "=": "q5", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
-                "q4": {"<": "qD", ">": "qD", "=": "qD", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
-                "q5": {"<": "qD", ">": "qD", "=": "qD", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
-                "qD": {"<": "qD", ">": "qD", "=": "qD", "[A-Za-z * - + / ; : _ % ( ) . ]": "qD"},
+                "q0": {"<": "q1", ">": "q3", "=": "q2",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                "q1": {"<": "qD", ">": "q4", "=": "q4",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                "q2": {"<": "qD", ">": "qD", "=": "qD",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                "q3": {"<": "qD", ">": "qD", "=": "q5",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                "q4": {"<": "qD", ">": "qD", "=": "qD",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                "q5": {"<": "qD", ">": "qD", "=": "qD",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                "qD": {"<": "qD", ">": "qD", "=": "qD",
+                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
 
             },
             initial_state="q0",
-            final_states={"q1,q2,q3,q4,q5"},
+            final_states={"q1", "q2", "q3", "q4", "q5"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        self.draw_DFA()
 
-
-
-
-
-    def dfa_integer_create(self, query_text):
+    def dfa_integer_create(self):
         dfa = VisualDFA(
-            #[A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
+            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "qD"},
             input_symbols={"[0-9]", "[A-Za-z . * - + / ; : _ % ( ) < > = ]"},
             transitions={
@@ -359,31 +392,32 @@ class Editor(object):
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-    def dfa_real_create(self, query_text):
+    def dfa_real_create(self):
         dfa = VisualDFA(
-            #[A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
+            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "qD"},
-            input_symbols={"[0-9]", ".", "[A-Za-z * - + / ; : _ % ( ) < > = ]"},
+            input_symbols={"[0-9]", ".", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | ="},
             transitions={
-                "q0": {"[0-9]": "q1", ".": "qD","[A-Za-z  * - + / ; : _ % ( ) < > = ]": "qD"},
-                "q1": {"[0-9]": "q1", ".": "q2","[A-Za-z  * - + / ; : _ % ( ) < > = ]": "qD"},
-                "q2": {"[0-9]": "q3", ".": "qD","[A-Za-z  * - + / ; : _ % ( ) < > = ]": "qD"},
-                "q3": {"[0-9]": "q3", ".": "qD","[A-Za-z  * - + / ; : _ % ( ) < > = ]": "qD"},
-                "qD": {"[0-9]": "qD", ".": "qD","[A-Za-z  * - + / ; : _ % ( ) < > = ]": "qD"},
+                "q0": {"[0-9]": "q1", ".": "qD", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
+                "q1": {"[0-9]": "q1", ".": "q2", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
+                "q2": {"[0-9]": "q3", ".": "qD", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
+                "q3": {"[0-9]": "q3", ".": "qD", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
+                "qD": {"[0-9]": "qD", ".": "qD", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
 
             },
             initial_state="q0",
             final_states={"q3"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        self.draw_DFA()
 
-    def dfa_variable_create(self, query_text):
+    def dfa_variable_create(self):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "qD"},
-            input_symbols={"_","[A-Z]", "[a-z]", "[0-9]", "[. * - + / ; :  % ( ) < > = ]"},
+            input_symbols={"_", "[A-Z]", "[a-z]", "[0-9]", "[. * - + / ; :  % ( ) < > = ]"},
             transitions={
                 "q0": {"_": "q2", "[A-Z]": "q1", "[a-z]": "qD", "[0-9]": "qD", "[. * - + / ; :  % ( ) < > = ]": "qD"},
                 "q1": {"_": "q1", "[A-Z]": "q1", "[a-z]": "q1", "[0-9]": "q1", "[. * - + / ; :  % ( ) < > = ]": "qD"},
@@ -394,9 +428,9 @@ class Editor(object):
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-    def dfa_comment_create(self, query_text):
+    def dfa_comment_create(self):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "q4", "q5", "q6" "qD"},
@@ -415,7 +449,7 @@ class Editor(object):
             initial_state="q0",
             final_states={"q2", "q6"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
 
     def run_query(self):
         """Interpret the entered rules and query and display the results in the
@@ -428,9 +462,9 @@ class Editor(object):
         rules_text = self.rule_editor.get(1.0, "end-1c")
         query_text = self.query_editor.get(1.0, "end-1c")
 
-        tokenline = rules_text.split('\n')
-        for line in tokenline:
-            Scanner.Scan(line)
+        # tokenline = rules_text.split('\n')
+        # for line in tokenline:
+        #     Scanner.Scan(line)
 
         # # Create a new solver, so we can try to query for solutions.
         # try:
@@ -544,13 +578,12 @@ class Editor(object):
 if __name__ == "__main__":
     root = Tk()
     root.tk.call("source", "Themes/azure.tcl")
-    root.tk.call("set_theme", "light")
+    root.tk.call("set_theme", "dark")
     editor = Editor(root)
     root.iconbitmap("assets/icons8-python-96.ico")
     myappid = 'PrologInterpreter'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     # Don't allow users to re-size the editor
     root.resizable(width=FALSE, height=FALSE)
-
 
     root.mainloop()
