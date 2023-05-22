@@ -395,7 +395,7 @@ class Editor(object):
 
     def dfa_arithmetic_create(self, querytext):
         dfa = VisualDFA(
-            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
+            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   < >
             states={"q0", "q1", "qD"},
             # input_symbols={"* / + -", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]"},
             input_symbols={"P", "L"},
@@ -414,6 +414,38 @@ class Editor(object):
             final_states={"q1"},
         )
         dfa.show_diagram(input_str=querytext,filename='Digraph', format_type="png", path="test-graphs", view=False)
+
+    def dfa_char_create(self, query_text):
+            dfa = VisualDFA(
+                states={"q0", "q1", "qD"},
+                input_symbols={"[A-Z] | [a-z]", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | ="},
+                transitions={
+                    "q0": {"[A-Z] | [a-z]": "q1", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+                    "q1": {"[A-Z] | [a-z]": "qD", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+                    "qD": {"[A-Z] | [a-z]": "qD", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+
+                },
+                initial_state="q0",
+                final_states={"q1"},
+            )
+            dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",view=False)
+
+    def dfa_string_create(self, query_text):
+        dfa = VisualDFA(
+            states={"q0", "q1", "q2", "qD"},
+            input_symbols={"[A-Z] | [a-z]", "[0-9]", ".| * | - | + | / | ; | : | _ | % | ( | ) | < | > | ="},
+            transitions={
+                "q0": {"[A-Z] | [a-z]": "q1", "[0-9]":"qD",  ".| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
+                "q1": {"[A-Z] | [a-z]": "q1", "[0-9]":"q1",  ".| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
+                "qD": {"[A-Z] | [a-z]": "qD", "[0-9]":"qD",  ".| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
+            },
+            initial_state="q0",
+            final_states={"q1"},
+        )
+        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",
+                         view=False)
+
+
 
     def dfa_relational_create(self):
         dfa = VisualDFA(
