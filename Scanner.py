@@ -462,9 +462,9 @@ def Cx(j):
     else:
         out = Match(Token_type.If, j)
         children.append(out["node"])
-        Body_dict = Body(out["index"])
-        children.append(Body_dict["node"])
-        out1=Match(Token_type.End,Body_dict["index"])
+        B_dict = B(out["index"])
+        children.append(B_dict["node"])
+        out1=Match(Token_type.End,B_dict["index"])
         children.append(out1["node"])
         Node = Tree('Cx', children)
         output["node"] = Node
@@ -588,6 +588,54 @@ def Cldata(j):
         output["index"] = out["index"]
         return output
  ##########################################
+
+def B(j):
+    output = dict()
+    children = []
+    Body_dict=Body(j)
+    children.append(Body_dict["node"])
+    By_dict=By(Body_dict["index"])
+    children.append(By_dict["node"])
+    Node = Tree('B', children)
+    output["node"] = Node
+    output["index"] = By_dict["index"]
+    return output
+def By(j):
+    output = dict()
+    children = []
+    if(j<len(Tokens)):
+        Temp = Tokens[j].to_dict()
+        if(Temp['token_type']==Token_type.Or):
+            out=Match(Token_type.Or,j)
+            children.append(out["node"])
+            B_dict=B(out["index"])
+            children.append(B_dict["node"])
+            Node = Tree('By', children)
+            output["node"] = Node
+            output["index"] = B_dict["index"]
+            return output
+        elif(Temp['token_type']==Token_type.And):
+            out = Match(Token_type.And, j)
+            children.append(out["node"])
+            B_dict = B(out["index"])
+            children.append(B_dict["node"])
+            Node = Tree('By', children)
+            output["node"] = Node
+            output["index"] = B_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('V', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('V', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+
 def Body(j):
     output=dict()
     children=[]
