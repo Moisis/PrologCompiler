@@ -74,7 +74,7 @@ ReservedWords = {":-": Token_type.If,
                  "(": Token_type.openBracket,
                  ")": Token_type.closeBracket,
                  "Not": Token_type.Not,
-                "Predicate": Token_type.predicate,
+                "Predicates": Token_type.predicate,
                 "Clause": Token_type.clause,
                 "Goal": Token_type.goal,
                 "int": Token_type.integer,
@@ -87,7 +87,7 @@ ReservedWords = {":-": Token_type.If,
                  "readint":  Token_type.readint,
                  "readchar": Token_type.readchar,
                  "write": Token_type.write,
-                 " "    : Token_type.space
+                 " ": Token_type.space
                  }
 Operators = {".": Token_type.Dot,
              "=": Token_type.AssignOp,
@@ -822,35 +822,35 @@ def Operator(j):
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     elif (Temp['token_type'] == Token_type.MinusOp):
         out = Match(Token_type.MinusOp, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     elif (Temp['token_type'] == Token_type.MultiplyOp):
         out = Match(Token_type.MultiplyOp, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     elif (Temp['token_type'] == Token_type.DivideOp):
         out = Match(Token_type.DivideOp, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     else:
         out = Match(Token_type.PlusOp, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
 def Relationaloperators(j):
     output = dict()
@@ -861,35 +861,35 @@ def Relationaloperators(j):
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     elif (Temp['token_type'] == Token_type.greaterOrEqual):
         out = Match(Token_type.greaterOrEqual, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     elif (Temp['token_type'] == Token_type.smallerThan):
         out = Match(Token_type.smallerThan, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     elif (Temp['token_type'] == Token_type.smallerOrEqual):
         out = Match(Token_type.smallerOrEqual, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
     else:
         out = Match(Token_type.greaterThan, j)
         children.append(out["node"])
         Node = Tree('Operator', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
 def Expression(j):
     output = dict()
