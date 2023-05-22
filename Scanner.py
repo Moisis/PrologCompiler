@@ -3,23 +3,13 @@
 
 # In[49]:
 
-
 import tkinter as tk
-from enum import Enum
 import re
 import pandas
 import pandastable as pt
 from nltk.tree import*
 from enum import Enum
-import re
 from tkinter.scrolledtext import ScrolledText
-
-
-
-
-
-import pandas
-
 
 class Token_type(Enum):  # listing all tokens type
     If = 1
@@ -59,6 +49,11 @@ class Token_type(Enum):  # listing all tokens type
     readchar = 35
     write = 36
     value = 37
+    word = 38
+    space =39
+    singlecomment=40
+    Startcomment=41
+    Endcomment=42
 # class token to hold string and token type
 class token:
     def __init__(self, lex, token_type):
@@ -70,7 +65,6 @@ class token:
             'Lex': self.lex,
             'token_type': self.token_type
         }
-
 
 # Reserved word Dictionary
 ReservedWords = {":-": Token_type.If,
@@ -93,9 +87,7 @@ ReservedWords = {":-": Token_type.If,
                  "readint":  Token_type.readint,
                  "readchar": Token_type.readchar,
                  "write": Token_type.write,
-
-
-
+                 " "    : Token_type.space
                  }
 Operators = {".": Token_type.Dot,
              "=": Token_type.AssignOp,
@@ -107,10 +99,11 @@ Operators = {".": Token_type.Dot,
              "<": Token_type.smallerThan,
              ">=": Token_type.greaterOrEqual,
              "<=": Token_type.smallerOrEqual,
-             "<>": Token_type.notEqual  ####
-
-
-
+             "<>": Token_type.notEqual,
+             "\"": Token_type.word,
+             "%":Token_type.singlecomment,
+             "/*":Token_type.Startcomment,
+             "*/":Token_type.Endcomment
              }
 Tokens = []  # to add tokens to list
 errors=[]
@@ -121,6 +114,8 @@ def split_token(text):
     colonFlag = False
     greaterThanFLag = False
     smallerThanFlag = False
+    DivisionFlag = False
+    MultiplyFlag=False
 
     for char in text:
         if colonFlag:
@@ -157,6 +152,26 @@ def split_token(text):
                 word1.append("<")
             smallerThanFlag = False
 
+        elif DivisionFlag:
+            if temp !="":
+                word1.append(temp)
+                temp=""
+            if char == '*':
+                word1.append("/*")
+            else:
+                word1.append("/")
+            DivisionFlag=False
+
+        elif MultiplyFlag:
+            if temp !="":
+                word1.append(temp)
+                temp=""
+            if char == '/':
+                word1.append("*/")
+            else:
+                word1.append("*")
+            MultiplyFlag=False
+
         elif char in ReservedWords:
             if temp != "":
                 if char=='(':
@@ -174,6 +189,11 @@ def split_token(text):
             greaterThanFLag = True
         elif char == "<":
             smallerThanFlag = True
+
+        elif char =="/":
+            DivisionFlag=True
+        elif char == "*":
+            MultiplyFlag=True
 
         elif char in Operators:
             if temp != "":
@@ -194,8 +214,6 @@ def split_token(text):
     if len(temp) > 0:
         word1.append(temp)
     return word1
-
-
 
 def find_token(text):
    tokens = split_token(text)
@@ -229,72 +247,121 @@ def find_token(text):
         Tokens.append(token(word, Token_type.Error))
 
                                                     ########## GRAMMAR ################
-
 def Parse():
     j = 0
     Children = []
     Predicate_dict = Predicate(j)
     Children.append(Predicate_dict["node"])  ###############
-    # dic_output = Match(Token_type.Dot, Predicate_dict["index"])
-    # Children.append(dic_output["node"])
+    Clause_dict=Clause(Predicate_dict["index"])      #######Predicate_dict["index"]
+    Children.append(Clause_dict["node"])
+    Goal_dict=Goal(Clause_dict["index"])         ######Clause_dict["index"]
+    Children.append(Goal_dict["node"])
     Node = Tree('Program', Children)
-
     return Node
-
+                        ####################################### Predicate
 def Predicate(j):
     children = []
     output=dict()
-
-    # out=Match(Token_type.Predicate,j)
-    # children.append(out["node"])    out["index"]
-    Pre_dict = Pre(j)
+    out=Match(Token_type.predicate,j)           ## open when split work
+    children.append(out["node"])
+    out1 = Match(Token_type.space,out["index"])   #fix split
+    children.append(out1["node"])
+    Pre_dict = Pre(out1["index"])                 # out["index"]
     children.append(Pre_dict["node"])
-    # out1=Match(Token_type.Identifier,j)
-    # children.append(out1["node"])
     Node = Tree('Predicate',children)
     output["node"]=Node
     output["index"]=Pre_dict["index"]                    # out["index"]
-
     return output
 def Pre(j):
     output = dict()
     children = []
-    out=Match(Token_type.predicate_name,j)
-    children.append(out["node"])
-    out1=Match(Token_type.openBracket,out["index"])
-    children.append(out1["node"])
-    Pl_dict=Pl(out1["index"])
-    children.append(Pl_dict["node"])
-    out2=Match(Token_type.closeBracket,Pl_dict["index"])
-    children.append(out2["node"])
-    out3=Match(Token_type.End,out2["index"])
-    children.append(out3["node"])
-    Node = Tree('Pre', children)
-    output["node"] = Node
-    output["index"] = out3["index"]
-    return output
+    if(j<len(Tokens)):
+        Temp=Tokens[j].to_dict()
+        if(Temp['token_type']==Token_type.predicate_name):
+            out=Match(Token_type.predicate_name,j)
+            children.append(out["node"])
+            out1=Match(Token_type.openBracket,out["index"])
+            children.append(out1["node"])
+            Pl_dict=Pl(out1["index"])
+            children.append(Pl_dict["node"])
+            out2=Match(Token_type.closeBracket,Pl_dict["index"])
+            children.append(out2["node"])
+            out3=Match(Token_type.End,out2["index"])
+            children.append(out3["node"])
+            Y_dict = Y(out3["index"])
+            children.append(Y_dict["node"])
+            Node = Tree('Pre', children)
+            output["node"] = Node
+            output["index"] = Y_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('Pre', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Pre', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Y(j):
+    output = dict()
+    children = []
+    if(j < len(Tokens)):
+        temp = Tokens[j].to_dict()
+        if(temp['token_type'] == Token_type.predicate_name):
+            Pre_dict=Pre(j)
+            children.append(Pre_dict["node"])
+            Node = Tree('Y', children)
+            output["node"] = Node
+            output["index"] = Pre_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('Y', children)
+            output["node"] = Node
+            output["index"] =j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Y', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+
+
+
 def Pl(j):
      output = dict()
      children = []
-     temp=Tokens[j+1].to_dict()
-
-     if(temp['token_type'] == Token_type.And):
-        Data_dict=Data(j)
-        children.append(Data_dict["node"])
-        out = Match(Token_type.And, Data_dict["index"])
+     Data_dict = Data(j)
+     children.append(Data_dict["node"])
+     Ply_dict=Ply(Data_dict["index"])
+     children.append(Ply_dict["node"])
+     Node = Tree('Pl', children)
+     output["node"] = Node
+     output["index"] = Ply_dict["index"]
+     return output
+def Ply(j):
+    output = dict()
+    children = []
+    temp = Tokens[j].to_dict()
+    if (temp['token_type'] == Token_type.And):
+        out=Match(Token_type.And,j)
         children.append(out["node"])
-        X_dict = X(out["index"])
+        X_dict=X(out["index"])
         children.append(X_dict["node"])
-        Node = Tree('Pl', children)
+        Node = Tree('Ply', children)
         output["node"] = Node
         output["index"] = X_dict["index"]
         return output
-     else:
-        Data_dict = Data(j)
-        children.append(Data_dict["node"])
-        Node = Tree('Pl', children)
+    else:
+        children.append("Epsilon")
+        Node = Tree('Ply', children)
         output["node"] = Node
-        output["index"] = Data_dict["index"]
+        output["index"] = j
         return output
 def X(j):
     output = dict()
@@ -309,14 +376,14 @@ def Data(j):
     output = dict()
     children = []
     temp = Tokens[j].to_dict()
-    if temp == Token_type.string:
+    if temp['token_type'] == Token_type.string:
         out1 = Match(Token_type.string, j)
         children.append(out1["node"])
         Node = Tree('Data', children)
         output["node"] = Node
         output["index"] = out1["index"]
         return output
-    elif temp == Token_type.integer:
+    elif temp['token_type'] == Token_type.integer:
         out = Match(Token_type.integer, j)
         children.append(out["node"])
         Node = Tree('Data', children)
@@ -324,22 +391,22 @@ def Data(j):
         output["index"] = out["index"]
         return output
 
-    elif temp == Token_type.real :
+    elif temp['token_type'] == Token_type.real :
         out2 = Match(Token_type.real, j)
         children.append(out2["node"])
         Node = Tree('Data', children)
         output["node"]=Node
         output["index"]=out2["index"]
         return output
-    elif temp == Token_type.symbol:
+    elif temp['token_type'] == Token_type.symbol:
         out3 = Match(Token_type.symbol, j)
         children.append(out3["node"])
         Node = Tree('Data', children)
         output["node"]=Node
         output["index"]=out3["index"]
         return output
-    elif temp==Token_type.char:
-        out4 = Match(Token_type.symbol, j)
+    elif temp['token_type']==Token_type.char:
+        out4 = Match(Token_type.char, j)
         children.append(out4["node"])
         Node = Tree('Data', children)
         output["node"] = Node
@@ -349,6 +416,698 @@ def Data(j):
         out = Match(Token_type.integer, j)
         children.append(out["node"])
         Node = Tree('Data', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+
+                              #############################################  Clause
+def Clause(j):
+    output = dict()
+    children = []
+    out=Match(Token_type.clause,j)  ## open when split work
+    children.append(out["node"])
+    out1 = Match(Token_type.space, out["index"])  # fix split
+    children.append(out1["node"])
+    C_dict = C(out1["index"])                    #out["index"]
+    children.append(C_dict["node"])
+    Node = Tree('Clause', children)
+    output["node"] = Node
+    output["index"] = C_dict["index"]
+    return output
+def C(j) :
+    output=dict()
+    children=[]
+    Cl_dict=Cl(j)
+    children.append(Cl_dict["node"])
+    Cx_dict=Cx(Cl_dict["index"])
+    children.append(Cx_dict["node"])
+    Node = Tree('C', children)
+    output["node"] = Node
+    output["index"] = Cx_dict["index"]
+    return output
+
+def Cx(j):
+    output=dict()
+    children=[]
+    Temp = Tokens[j].to_dict()
+    if Temp['token_type'] == Token_type.End:
+        out = Match(Token_type.End,j)
+        children.append(out["node"])
+        Cxy_dict=Cxy(out["index"])
+        children.append(Cxy_dict["node"])
+        Node = Tree('Cx', children)
+        output["node"] = Node
+        output["index"] = Cxy_dict["index"]
+        return output
+    else:
+        out = Match(Token_type.If, j)
+        children.append(out["node"])
+        Body_dict = Body(out["index"])
+        children.append(Body_dict["node"])
+        out1=Match(Token_type.End,Body_dict["index"])
+        children.append(out1["node"])
+        Node = Tree('Cx', children)
+        output["node"] = Node
+        output["index"] = out1["index"]
+        return output
+def Cxy(j):
+    output=dict()
+    children=[]
+    if (j < len(Tokens)):
+        temp = Tokens[j].to_dict()
+        if (temp['token_type'] == Token_type.predicate_name):
+            C_dict = C(j)
+            children.append(C_dict["node"])
+            Node = Tree('Cxy', children)
+            output["node"] = Node
+            output["index"] = C_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('Cxy', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Cxy', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Cl(j):
+    output=dict()
+    children=[]
+    out = Match(Token_type.predicate_name, j)
+    children.append(out["node"])
+    out1 = Match(Token_type.openBracket, out["index"])
+    children.append(out1["node"])
+    Ids_dict = Ids(out1["index"])
+    children.append(Ids_dict["node"])
+    out2 = Match(Token_type.closeBracket, Ids_dict["index"])
+    children.append(out2["node"])
+    Node = Tree('Cl', children)
+    output["node"] = Node
+    output["index"] = out2["index"]
+    return output
+def Ids(j):
+    output = dict()
+    children = []
+    Cldata_dict = Cldata(j)
+    children.append(Cldata_dict["node"])
+    Idsy_dict = Idsy(Cldata_dict["index"])
+    children.append(Idsy_dict["node"])
+    Node = Tree('Ids', children)
+    output["node"] = Node
+    output["index"] = Idsy_dict["index"]
+    return output
+def Idsy(j):
+    output = dict()
+    children = []
+    temp = Tokens[j].to_dict()
+    if (temp['token_type'] == Token_type.And):
+        out=Match(Token_type.And,j)
+        children.append(out["node"])
+        Clx_dict=Clx(out["index"])
+        children.append(Clx_dict["node"])
+        Node = Tree('Idsy', children)
+        output["node"] = Node
+        output["index"] = Clx_dict["index"]
+        return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Cly', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Clx(j):
+    output = dict()
+    children = []
+    Ids_dict = Ids(j)
+    children.append(Ids_dict["node"])
+    Node = Tree('D', children)
+    output["node"] = Node
+    output["index"] = Ids_dict["index"]
+    return output
+def Cldata(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j].to_dict()
+    if Temp['token_type'] == Token_type.Identifier:
+        out = Match(Token_type.Identifier, j)
+        children.append(out["node"])
+        Node = Tree('Cldata', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    elif Temp['token_type'] == Token_type.value:
+        out = Match(Token_type.value, j)
+        children.append(out["node"])
+        Node = Tree('Cldata', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    elif Temp['token_type'] == Token_type.Constant:
+        out = Match(Token_type.Constant, j)
+        children.append(out["node"])
+        Node = Tree('Cldata', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    elif Temp['token_type'] == Token_type.Real:
+        out = Match(Token_type.Real, j)
+        children.append(out["node"])
+        Node = Tree('Cldata', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    else:
+        out = Match(Token_type.Identifier, j)
+        children.append(out["node"])
+        Node = Tree('Cldata', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+ ##########################################
+def Body(j):
+    output=dict()
+    children=[]
+    Temp = Tokens[j].to_dict()
+    if(Temp['token_type']==Token_type.readchar or Temp['token_type']==Token_type.readint or Temp['token_type']==Token_type.readString or Temp['token_type']==Token_type.write):
+        BuiltFunction_dict=BuiltFunction(j)
+        children.append(BuiltFunction_dict["node"])
+        Node = Tree('Body', children)
+        output["node"] = Node
+        output["index"] = BuiltFunction_dict["index"]
+        return output
+    elif(Temp['token_type']==Token_type.Identifier):
+        temp=Tokens[j+1].to_dict()
+        if(temp['token_type']==Token_type.PlusOp or temp['token_type']==Token_type.MinusOp or temp['token_type']==Token_type.MultiplyOp or temp['token_type']==Token_type.DivideOp ):
+            Expression_dict=Expression(j)
+            children.append(Expression_dict["node"])
+            Node = Tree('Body', children)
+            output["node"] = Node
+            output["index"] = Expression_dict["index"]
+            return output
+        else:
+            RelationExpression_dict = RelationExpression(j)
+            children.append(RelationExpression_dict["node"])
+            Node = Tree('Body', children)
+            output["node"] = Node
+            output["index"] = RelationExpression_dict["index"]
+            return output
+    else:
+        Comment_dict = Comment(j)
+        children.append(Comment_dict["node"])
+        Node = Tree('Body', children)
+        output["node"] = Node
+        output["index"] = Comment_dict["index"]
+        return output
+def BuiltFunction(j):
+    output=dict()
+    children=[]
+    Temp = Tokens[j].to_dict()
+    if(Temp['token_type']==Token_type.readint):
+        out=Match(Token_type.readint,j)
+        children.append(out["node"])
+        out1=Match(Token_type.openBracket,out["index"])
+        children.append(out1["node"])
+        out2=Match(Token_type.Identifier,out1["index"])
+        children.append(out2["node"])
+        out3=Match(Token_type.closeBracket,out2["index"])
+        children.append(out3["node"])
+        Node = Tree('BuiltFunction', children)
+        output["node"] = Node
+        output["index"] = out3["index"]
+        return output
+    elif (Temp['token_type']==Token_type.readchar):
+        out=Match(Token_type.readchar,j)
+        children.append(out["node"])
+        out1=Match(Token_type.openBracket,out["index"])
+        children.append(out1["node"])
+        out2=Match(Token_type.Identifier,out1["index"])
+        children.append(out2["node"])
+        out3=Match(Token_type.closeBracket,out2["index"])
+        children.append(out3["node"])
+        Node = Tree('BuiltFunction', children)
+        output["node"] = Node
+        output["index"] = out3["index"]
+        return output
+    elif (Temp['token_type'] == Token_type.readString):
+        out = Match(Token_type.readString, j)
+        children.append(out["node"])
+        out1 = Match(Token_type.openBracket, out["index"])
+        children.append(out1["node"])
+        out2 = Match(Token_type.Identifier, out1["index"])
+        children.append(out2["node"])
+        out3 = Match(Token_type.closeBracket, out2["index"])
+        children.append(out3["node"])
+        Node = Tree('BuiltFunction', children)
+        output["node"] = Node
+        output["index"] = out3["index"]
+        return output
+    elif (Temp['token_type'] == Token_type.write):
+        out = Match(Token_type.write, j)
+        children.append(out["node"])
+        out1 = Match(Token_type.openBracket, out["index"])
+        children.append(out1["node"])
+        out2 = Match(Token_type.word, out1["index"])
+        children.append(out2["node"])
+        Parameter_dict = Parameter(out2["index"])
+        children.append(Parameter_dict["node"])                              ######## need more words
+        out3 = Match(Token_type.word,Parameter_dict["index"])
+        children.append(out3["node"])
+        out4 = Match(Token_type.closeBracket, out3["index"])
+        children.append(out4["node"])
+        Node = Tree('BuiltFunction', children)
+        output["node"] = Node
+        output["index"] = out3["index"]
+        return output
+    else:
+        out = Match(Token_type.write, j)
+        children.append(out["node"])
+        Node = Tree('BuiltFunction', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+def Parameter(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j].to_dict()
+    if(Temp['token_type']==Token_type.Identifier):
+        out = Match(Token_type.Identifier,j)
+        children.append(out["node"])
+        V_dict= V(out["index"])
+        children.append(V_dict["node"])
+        Node = Tree('Parameter', children)
+        output["node"] = Node
+        output["index"] = V_dict["index"]
+        return output
+    elif (Temp['token_type'] == Token_type.value):
+        out = Match(Token_type.value, j)
+        children.append(out["node"])
+        V_dict = V(out["index"])
+        children.append(V_dict["node"])
+        Node = Tree('Parameter', children)
+        output["node"] = Node
+        output["index"] = V_dict["index"]
+        return output
+    elif (Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp):
+        Operator_dict=Operator(j)
+        children.append(Operator_dict["node"])
+        V_dict = V(Operator_dict["index"])
+        children.append(V_dict["node"])
+        Node = Tree('Parameter', children)
+        output["node"] = Node
+        output["index"] = V_dict["index"]
+        return output
+    elif (Temp['token_type'] == Token_type.greaterThan or Temp['token_type'] == Token_type.greaterOrEqual or Temp['token_type'] == Token_type.smallerThan or Temp['token_type'] == Token_type.smallerOrEqual ):
+        Relationaloperators_dict=Relationaloperators(j)
+        children.append(Relationaloperators_dict["node"])
+        V_dict = V(Relationaloperators_dict["index"])
+        children.append(V_dict["node"])
+        Node = Tree('Parameter', children)
+        output["node"] = Node
+        output["index"] = V_dict["index"]
+        return output
+    else:
+        out = Match(Token_type.Identifier, j)
+        children.append(out["node"])
+        V_dict = V(out["index"])
+        children.append(V_dict["node"])
+        Node = Tree('Parameter', children)
+        output["node"] = Node
+        output["index"] = V_dict["index"]
+        return output
+
+def V(j):
+    output = dict()
+    children = []
+    if(j<len(Tokens)):
+        Temp = Tokens[j].to_dict()
+        if(Temp['token_type'] == Token_type.greaterThan or Temp['token_type'] == Token_type.greaterOrEqual or Temp['token_type'] == Token_type.smallerThan or Temp['token_type'] == Token_type.smallerOrEqual or Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp or Temp['token_type'] == Token_type.value or Token_type.Identifier ):
+            out1 = Match(Token_type.space, j)
+            children.append(out1["node"])
+            Parameter_dict=Parameter(out1["index"])
+            children.append(Parameter_dict["node"])
+            Node = Tree('V', children)
+            output["node"] = Node
+            output["index"] = Parameter_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('V', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('V', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Operator(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j].to_dict()
+    if(Temp['token_type']==Token_type.PlusOp):
+        out =Match(Token_type.PlusOp,j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    elif (Temp['token_type'] == Token_type.MinusOp):
+        out = Match(Token_type.MinusOp, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    elif (Temp['token_type'] == Token_type.MultiplyOp):
+        out = Match(Token_type.MultiplyOp, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    elif (Temp['token_type'] == Token_type.DivideOp):
+        out = Match(Token_type.DivideOp, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    else:
+        out = Match(Token_type.PlusOp, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Relationaloperators(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j].to_dict()
+    if (Temp['token_type'] == Token_type.greaterThan):
+        out = Match(Token_type.greaterThan, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    elif (Temp['token_type'] == Token_type.greaterOrEqual):
+        out = Match(Token_type.greaterOrEqual, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    elif (Temp['token_type'] == Token_type.smallerThan):
+        out = Match(Token_type.smallerThan, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    elif (Temp['token_type'] == Token_type.smallerOrEqual):
+        out = Match(Token_type.smallerOrEqual, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+    else:
+        out = Match(Token_type.greaterThan, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Expression(j):
+    output = dict()
+    children = []
+    out=Match(Token_type.Identifier,j)
+    children.append(out["node"])
+    Operator_dict=Operator(out["index"])
+    children.append(Operator_dict["node"])
+    Expressionx_dict=Expressionx(Operator_dict["index"])
+    children.append(Expressionx_dict["node"])
+    Node = Tree('Expression', children)
+    output["node"] = Node
+    output["index"] = Expressionx_dict["index"]
+    return output
+def Expressionx(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j+1].to_dict()
+    if(Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp):
+        Expression_dict=Expression(j)
+        children.append(Expression_dict["node"])
+        Node = Tree('Expressionx', children)
+        output["node"] = Node
+        output["index"] = Expression_dict["index"]
+        return output
+    else:
+        Dataexp_dict =Dataexp(j)
+        children.append(Dataexp_dict["node"])
+        Node = Tree('Expressionx', children)
+        output["node"] = Node
+        output["index"] = Dataexp_dict["index"]
+        return output
+def Dataexp(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j].to_dict()
+    if (Temp['token_type'] == Token_type.Identifier):
+        out = Match(Token_type.Identifier, j)
+        children.append(out["node"])
+        Node = Tree('Dataexp', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    elif (Temp['token_type'] == Token_type.Constant):
+        out = Match(Token_type.Constant, j)
+        children.append(out["node"])
+        Node = Tree('Dataexp', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    elif (Temp['token_type'] == Token_type.Real):
+        out = Match(Token_type.Real, j)
+        children.append(out["node"])
+        Node = Tree('Dataexp', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+    else:
+        out = Match(Token_type.Identifier, j)
+        children.append(out["node"])
+        Node = Tree('Dataexp', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+
+def RelationExpression(j):
+    output = dict()
+    children = []
+    out = Match(Token_type.Identifier, j)
+    children.append(out["node"])
+    Relationaloperators_dict = Relationaloperators(out["index"])
+    children.append(Relationaloperators_dict["node"])
+    RelationExpressionx_dict = RelationExpressionx(Relationaloperators_dict["index"])
+    children.append(RelationExpressionx_dict["node"])
+    Node = Tree('RelationExpression', children)
+    output["node"] = Node
+    output["index"] = RelationExpressionx_dict["index"]
+    return output
+def RelationExpressionx(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j+1].to_dict()
+    if(Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp):
+        Expression_dict=Expression(j)
+        children.append(Expression_dict["node"])
+        Node = Tree('Expressionx', children)
+        output["node"] = Node
+        output["index"] = Expression_dict["index"]
+        return output
+    else:
+        Dataexp_dict =Dataexp(j)
+        children.append(Dataexp_dict["node"])
+        Node = Tree('Expressionx', children)
+        output["node"] = Node
+        output["index"] = Dataexp_dict["index"]
+        return output
+
+def Comment(j):
+    output = dict()
+    children = []
+    Temp = Tokens[j].to_dict()
+    if(Temp["token_type"]==Token_type.Startcomment):
+        out = Match(Token_type.Startcomment,j)
+        children.append(out["node"])
+        Parameter_dict=Parameter(out["index"])
+        children.append(Parameter_dict["node"])
+        out1=Match(Token_type.Endcomment,Parameter_dict["index"])
+        children.append(out1["node"])
+        Node = Tree('Comment', children)
+        output["node"] = Node
+        output["index"] = out1["index"]
+        return output
+    elif(Temp["token_type"]==Token_type.singlecomment):
+        out=Match(Token_type.singlecomment,j)
+        children.append(out["node"])
+        Parameter_dict=Parameter(out["index"])
+        children.append(Parameter_dict["node"])
+        out1=Match(Token_type.End,Parameter_dict["index"])
+        children.append(out1["node"])
+        Node = Tree('Comment', children)
+        output["node"] = Node
+        output["index"] = out1["index"]
+        return output
+    else:
+        out = Match(Token_type.singlecomment, j)
+        children.append(out["node"])
+        Node = Tree('Comment', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+
+
+
+                                  ###################################   Goal
+def Goal(j):
+    output=dict()
+    children=[]
+    out=Match(Token_type.goal,j)      ## open when split work
+    children.append(out["node"])
+    out1 = Match(Token_type.space, out["index"])  # fix split
+    children.append(out1["node"])
+    G_dict=G(out1["index"])                          #out["index"]
+    children.append(G_dict["node"])
+    Node = Tree('Goal', children)
+    output["node"] = Node
+    output["index"] = G_dict["index"]
+    return output
+def G(j):
+    output = dict()
+    children = []
+    out = Match(Token_type.predicate_name, j)
+    children.append(out["node"])
+    out1 = Match(Token_type.openBracket, out["index"])
+    children.append(out1["node"])
+    Gpl_dict = Gpl(out1["index"])
+    children.append(Gpl_dict["node"])
+    out2 = Match(Token_type.closeBracket, Gpl_dict["index"])
+    children.append(out2["node"])
+    out3 = Match(Token_type.End, out2["index"])
+    Gy_dict = Gy(out3["index"])
+    children.append(Gy_dict["node"])
+    Node = Tree('G', children)
+    output["node"] = Node
+    output["index"] = Gy_dict["index"]
+    return output
+
+def Gy(j):
+    output = dict()
+    children = []
+    if(j < len(Tokens)):
+        temp = Tokens[j].to_dict()
+        if(temp['token_type'] == Token_type.predicate_name):
+            G_dict=G(j)
+            children.append(G_dict["node"])
+            Node = Tree('Gy', children)
+            output["node"] = Node
+            output["index"] = G_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('Gy', children)
+            output["node"] = Node
+            output["index"] =j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Gy', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def Gpl(j):
+    output = dict()
+    children = []
+    Vardata_dict = Vardata(j)
+    children.append(Vardata_dict["node"])
+    Gply_dict = Gply(Vardata_dict["index"])
+    children.append(Gply_dict["node"])
+    Node = Tree('GPl', children)
+    output["node"] = Node
+    output["index"] = Gply_dict["index"]
+    return output
+def Gply(j):
+    output = dict()
+    children = []
+    if(j<len(Tokens)):
+        temp = Tokens[j].to_dict()
+        if (temp['token_type'] == Token_type.And):
+            out=Match(Token_type.And,j)
+            children.append(out["node"])
+            D_dict=D(out["index"])
+            children.append(D_dict["node"])
+            Node = Tree('Gply', children)
+            output["node"] = Node
+            output["index"] = D_dict["index"]
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('GPly', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('GPly', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+def D(j):
+    output = dict()
+    children = []
+    Gpl_dict = Gpl(j)
+    children.append(Gpl_dict["node"])
+    Node = Tree('D', children)
+    output["node"] = Node
+    output["index"] = Gpl_dict["index"]
+    return output
+def Vardata(j):
+    output = dict()
+    children=[]
+    if(j<len(Tokens)):
+        Temp = Tokens[j].to_dict()
+        if Temp['token_type']==Token_type.Identifier:
+            out = Match(Token_type.Identifier, j)
+            children.append(out["node"])
+            Node = Tree('Vardata', children)
+            output["node"] = Node
+            output["index"] = out["index"]
+            return output
+        elif Temp['token_type']==Token_type.value:
+            out = Match(Token_type.value, j)
+            children.append(out["node"])
+            Node = Tree('Vardata', children)
+            output["node"] = Node
+            output["index"] = out["index"]
+            return output
+        else:
+            out = Match(Token_type.Identifier, j)
+            children.append(out["node"])
+            Node = Tree('Vardata', children)
+            output["node"] = Node
+            output["index"] = out["index"]
+            return output
+    else:
+        out = Match(Token_type.Identifier, j)
+        children.append(out["node"])
+        Node = Tree('Vardata', children)
         output["node"] = Node
         output["index"] = out["index"]
         return output
