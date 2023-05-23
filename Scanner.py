@@ -75,9 +75,9 @@ ReservedWords = {":-": Token_type.If,
                  "(": Token_type.openBracket,
                  ")": Token_type.closeBracket,
                  "Not": Token_type.Not,
-                "Predicates": Token_type.predicate,
-                "Clause": Token_type.clause,
-                "Goal": Token_type.goal,
+                "predicates": Token_type.predicate,
+                "clauses": Token_type.clause,
+                "goal": Token_type.goal,
                 "int": Token_type.integer,
                 "real": Token_type.real,
                 "string": Token_type.string,
@@ -291,7 +291,9 @@ def Pre(j):
             children.append(out2["node"])
             out3=Match(Token_type.End,out2["index"])
             children.append(out3["node"])
-            Y_dict = Y(out3["index"])
+            out4=Match(Token_type.space,out3["index"])
+            children.append(out4["node"])
+            Y_dict = Y(out4["index"])
             children.append(Y_dict["node"])
             Node = Tree('Pre', children)
             output["node"] = Node
@@ -456,7 +458,9 @@ def Cx(j):
     if Temp['token_type'] == Token_type.End:
         out = Match(Token_type.End,j)
         children.append(out["node"])
-        Cxy_dict=Cxy(out["index"])
+        out1=Match(Token_type.space,out["index"])
+        children.append(out1["node"])
+        Cxy_dict=Cxy(out1["index"])
         children.append(Cxy_dict["node"])
         Node = Tree('Cx', children)
         output["node"] = Node
@@ -469,9 +473,11 @@ def Cx(j):
         children.append(B_dict["node"])
         out1=Match(Token_type.End,B_dict["index"])
         children.append(out1["node"])
+        out2=Match(Token_type.space,out1["index"])
+        children.append(out2["node"])
         Node = Tree('Cx', children)
         output["node"] = Node
-        output["index"] = out1["index"]
+        output["index"] = out2["index"]
         return output
 def Cxy(j):
     output=dict()
@@ -731,7 +737,7 @@ def BuiltFunction(j):
         children.append(out4["node"])
         Node = Tree('BuiltFunction', children)
         output["node"] = Node
-        output["index"] = out3["index"]
+        output["index"] = out4["index"]
         return output
     else:
         out = Match(Token_type.write, j)
@@ -1038,11 +1044,9 @@ def Comment(j):
         children.append(out["node"])
         Parameter_dict=Parameter(out["index"])
         children.append(Parameter_dict["node"])
-        out1=Match(Token_type.End,Parameter_dict["index"])
-        children.append(out1["node"])
         Node = Tree('Comment', children)
         output["node"] = Node
-        output["index"] = out1["index"]
+        output["index"] = Parameter_dict["index"]
         return output
     else:
         out = Match(Token_type.singlecomment, j)
