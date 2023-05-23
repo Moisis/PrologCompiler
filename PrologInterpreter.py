@@ -231,25 +231,43 @@ class Editor(object):
             label="dfa_arithmetic_create", underline=1, command=self.dfa_arithmetic_createfinal
         )
         functionmenu.add_command(
-            label="animatearthmetic", underline=1, command=self.animatearthmetic
+            label="dfa_arithmetic_animate", underline=1, command=self.animatearthmetic
         )
         functionmenu.add_separator()
 
         functionmenu.add_command(
-            label="dfa_relational_create", underline=1, command=self.dfa_relational_create
+            label="dfa_relational_create", underline=1, command=self.dfa_relational_createfinal
+        )
+        functionmenu.add_command(
+            label="dfa_relational_animate", underline=1, command=self.dfa_relational_animate
         )
         functionmenu.add_separator()
         functionmenu.add_command(
-            label="dfa_integer_create", underline=1, command=self.dfa_integer_create
+            label="dfa_integer_create", underline=1, command=self.dfa_integer_createfinal
         )
         functionmenu.add_command(
-            label="dfa_real_create", underline=1, command=self.dfa_real_create
+            label="dfa_integer_animate", underline=1, command=self.dfa_integer_animate
+        )
+        functionmenu.add_separator()
+        functionmenu.add_command(
+            label="dfa_real_create", underline=1, command=self.dfa_real_createfinal
         )
         functionmenu.add_command(
-            label="dfa_variable_create", underline=1, command=self.dfa_variable_create
+            label="dfa_real_animate", underline=1, command=self.dfa_real_animate
+        )
+        functionmenu.add_separator()
+        functionmenu.add_command(
+            label="dfa_variable_create", underline=1, command=self.dfa_variable_createfinal
         )
         functionmenu.add_command(
-            label="dfa_comment_create", underline=1, command=self.dfa_comment_create
+            label="dfa_variable_animate", underline=1, command=self.dfa_variable_animate
+        )
+        functionmenu.add_separator()
+        functionmenu.add_command(
+            label="dfa_comment_create", underline=1, command=self.dfa_comment_createfinal
+        )
+        functionmenu.add_command(
+            label="dfa_comment_create", underline=1, command=self.dfa_comment_animate
         )
 
         menu_bar.add_cascade(label="Functions", underline=0, menu=functionmenu)
@@ -280,7 +298,7 @@ class Editor(object):
         photo1 = ImageTk.PhotoImage(Image.open('test-graphs/Digraph.png'))
         self.label1.config(image=photo1)
         self.label1.image = photo1
-
+# test sample
     def drawfinalDFA(self):
         self.solutions_display.delete("1.0", END)
         self.solutions_display.insert(END, "DFA DRAWN")
@@ -337,6 +355,7 @@ class Editor(object):
         )
         dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
+    # arth
     def animatearthmetic(self):
         alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                         'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -351,6 +370,9 @@ class Editor(object):
         self.diagrambox.insert(END, "Others(L) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | =")
         self.diagrambox.config(state=DISABLED)
         query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_arithmetic_create(query)
+            self.draw_DFA()
         self.arthcounter += 1
         if self.arthcounter > (len(query)):
             self.arthcounter = 0
@@ -380,6 +402,8 @@ class Editor(object):
         self.diagrambox.insert(END, "Others(L) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | =")
         self.diagrambox.config(state=DISABLED)
         query2 = self.legend.get(1.0, "end-1c")
+        if (query2 =='') :
+            self.dfa_arithmetic_create(query2)
         arthemticoperators = ['*', '/', '+', '-']
         query3 = ''
         for i in range(len(query2)):
@@ -390,7 +414,6 @@ class Editor(object):
 
         self.dfa_arithmetic_create(query3)
         self.draw_DFA()
-
 
 
     def dfa_arithmetic_create(self, querytext):
@@ -414,7 +437,7 @@ class Editor(object):
             final_states={"q1"},
         )
         dfa.show_diagram(input_str=querytext,filename='Digraph', format_type="png", path="test-graphs", view=False)
-
+#char
     def dfa_char_create(self, query_text):
             dfa = VisualDFA(
                 states={"q0", "q1", "qD"},
@@ -429,7 +452,7 @@ class Editor(object):
                 final_states={"q1"},
             )
             dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",view=False)
-
+#string
     def dfa_string_create(self, query_text):
         dfa = VisualDFA(
             states={"q0", "q1", "q2", "qD"},
@@ -444,6 +467,13 @@ class Editor(object):
         )
         dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",
                          view=False)
+
+# Relational
+    def dfa_relational_createfinal(self):
+        print()
+
+    def dfa_relational_animate(self):
+        print()
 
 
 
@@ -474,6 +504,12 @@ class Editor(object):
         )
         dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
         self.draw_DFA()
+# integer
+    def dfa_integer_createfinal(self):
+        print()
+
+    def dfa_integer_animate(self):
+        print()
 
     def dfa_integer_create(self):
         dfa = VisualDFA(
@@ -490,7 +526,12 @@ class Editor(object):
             final_states={"q1"},
         )
         dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+# real
+    def dfa_real_createfinal(self):
+        print()
 
+    def dfa_real_animate(self):
+        print()
     def dfa_real_create(self):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
@@ -514,6 +555,12 @@ class Editor(object):
         )
         dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
         self.draw_DFA()
+# variable
+    def dfa_variable_createfinal(self):
+        print()
+
+    def dfa_variable_animate(self):
+        print()
 
     def dfa_variable_create(self):
         dfa = VisualDFA(
@@ -531,7 +578,12 @@ class Editor(object):
             final_states={"q1"},
         )
         dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+# comment
+    def dfa_comment_createfinal(self):
+        print()
 
+    def dfa_comment_animate(self):
+        print()
     def dfa_comment_create(self):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
