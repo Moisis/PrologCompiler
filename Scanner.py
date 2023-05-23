@@ -283,18 +283,8 @@ def Pre(j):
         if(Temp['token_type']==Token_type.predicate_name):
             out=Match(Token_type.predicate_name,j)
             children.append(out["node"])
-            out1=Match(Token_type.openBracket,out["index"])
-            children.append(out1["node"])
-            Pl_dict=Pl(out1["index"])
-            children.append(Pl_dict["node"])
-            out2=Match(Token_type.closeBracket,Pl_dict["index"])
-            children.append(out2["node"])
-            out3=Match(Token_type.End,out2["index"])
-            children.append(out3["node"])
-            out4=Match(Token_type.space,out3["index"])
-            children.append(out4["node"])
-            Y_dict = Y(out4["index"])
-            children.append(Y_dict["node"])
+            Prey_dict=Prey(out["index"])
+            children.append(Prey_dict["node"])
             Node = Tree('Pre', children)
             output["node"] = Node
             output["index"] = Y_dict["index"]
@@ -1242,8 +1232,8 @@ label2 = tk.Label(root, text='Source code:')
 label2.config(font=('Times new Roman', 10))
 canvas1.create_window(200, 100, window=label2)
 
-entry1 = tk.Text(root, width=100,  height=10, padx=10, pady=10)
-canvas1.create_window(-100, 300, window=entry1)
+entry1 = tk.Text(root, width=50,  height=10, padx=10, pady=10)
+canvas1.create_window(200, 300, window=entry1)
 
 
 def Scan():
