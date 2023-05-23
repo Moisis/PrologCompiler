@@ -12,6 +12,7 @@ from enum import Enum
 from tkinter.scrolledtext import ScrolledText
 
 class Token_type(Enum):  # listing all tokens type
+    spaceline = 43
     If = 1
     End = 2
     And = 3
@@ -87,7 +88,8 @@ ReservedWords = {":-": Token_type.If,
                  "readint":  Token_type.readint,
                  "readchar": Token_type.readchar,
                  "write": Token_type.write,
-                 " ": Token_type.space
+                 "\n": Token_type.space,
+                 " ":Token_type.spaceline
                  }
 Operators = {".": Token_type.Dot,
              "=": Token_type.AssignOp,
@@ -216,6 +218,7 @@ def split_token(text):
     return word1
 
 def find_token(text):
+   Tokens.clear()
    tokens = split_token(text)
    for word in tokens:
     if word in ReservedWords:
@@ -740,43 +743,71 @@ def BuiltFunction(j):
 def Parameter(j):
     output = dict()
     children = []
-    Temp = Tokens[j].to_dict()
-    if(Temp['token_type']==Token_type.Identifier):
-        out = Match(Token_type.Identifier,j)
-        children.append(out["node"])
-        V_dict= V(out["index"])
-        children.append(V_dict["node"])
-        Node = Tree('Parameter', children)
-        output["node"] = Node
-        output["index"] = V_dict["index"]
-        return output
-    elif (Temp['token_type'] == Token_type.value):
-        out = Match(Token_type.value, j)
-        children.append(out["node"])
-        V_dict = V(out["index"])
-        children.append(V_dict["node"])
-        Node = Tree('Parameter', children)
-        output["node"] = Node
-        output["index"] = V_dict["index"]
-        return output
-    elif (Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp):
-        Operator_dict=Operator(j)
-        children.append(Operator_dict["node"])
-        V_dict = V(Operator_dict["index"])
-        children.append(V_dict["node"])
-        Node = Tree('Parameter', children)
-        output["node"] = Node
-        output["index"] = V_dict["index"]
-        return output
-    elif (Temp['token_type'] == Token_type.greaterThan or Temp['token_type'] == Token_type.greaterOrEqual or Temp['token_type'] == Token_type.smallerThan or Temp['token_type'] == Token_type.smallerOrEqual ):
-        Relationaloperators_dict=Relationaloperators(j)
-        children.append(Relationaloperators_dict["node"])
-        V_dict = V(Relationaloperators_dict["index"])
-        children.append(V_dict["node"])
-        Node = Tree('Parameter', children)
-        output["node"] = Node
-        output["index"] = V_dict["index"]
-        return output
+    if(j < len(Tokens)):
+        Temp = Tokens[j].to_dict()
+        if(Temp['token_type']==Token_type.Identifier):
+            out = Match(Token_type.Identifier,j)
+            children.append(out["node"])
+            V_dict= V(out["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
+        elif (Temp['token_type'] == Token_type.value):
+            out = Match(Token_type.value, j)
+            children.append(out["node"])
+            V_dict = V(out["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
+        elif (Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp):
+            Operator_dict=Operator(j)
+            children.append(Operator_dict["node"])
+            V_dict = V(Operator_dict["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
+        elif (Temp['token_type'] == Token_type.greaterThan or Temp['token_type'] == Token_type.greaterOrEqual or Temp['token_type'] == Token_type.smallerThan or Temp['token_type'] == Token_type.smallerOrEqual ):
+            Relationaloperators_dict=Relationaloperators(j)
+            children.append(Relationaloperators_dict["node"])
+            V_dict = V(Relationaloperators_dict["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
+        elif (Temp['token_type'] == Token_type.End):
+            out = Match(Token_type.End, j)
+            children.append(out["node"])
+            V_dict = V(out["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
+        elif (Temp['token_type'] == Token_type.AssignOp):
+            out = Match(Token_type.AssignOp, j)
+            children.append(out["node"])
+            V_dict = V(out["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
+        else:
+            out = Match(Token_type.Identifier, j)
+            children.append(out["node"])
+            V_dict = V(out["index"])
+            children.append(V_dict["node"])
+            Node = Tree('Parameter', children)
+            output["node"] = Node
+            output["index"] = V_dict["index"]
+            return output
     else:
         out = Match(Token_type.Identifier, j)
         children.append(out["node"])
@@ -792,8 +823,8 @@ def V(j):
     children = []
     if(j<len(Tokens)):
         Temp = Tokens[j].to_dict()
-        if(Temp['token_type'] == Token_type.greaterThan or Temp['token_type'] == Token_type.greaterOrEqual or Temp['token_type'] == Token_type.smallerThan or Temp['token_type'] == Token_type.smallerOrEqual or Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp or Temp['token_type'] == Token_type.value or Token_type.Identifier ):
-            out1 = Match(Token_type.space, j)
+        if(Temp['token_type'] == Token_type.spaceline):
+            out1 = Match(Token_type.spaceline, j)
             children.append(out1["node"])
             Parameter_dict=Parameter(out1["index"])
             children.append(Parameter_dict["node"])
@@ -1204,15 +1235,16 @@ label1.config(font=('helvetica', 14))
 canvas1.create_window(200, 25, window=label1)
 
 label2 = tk.Label(root, text='Source code:')
-label2.config(font=('helvetica', 10))
+label2.config(font=('Times new Roman', 10))
 canvas1.create_window(200, 100, window=label2)
 
-entry1 = tk.Entry(root)
-canvas1.create_window(200, 140, window=entry1)
+entry1 = tk.Text(root, width=100,  height=10, padx=10, pady=10)
+canvas1.create_window(-100, 300, window=entry1)
 
 
 def Scan():
-    x1 = entry1.get()
+    x1 = entry1.get(1.0, "end-1c")
+    print(x1)
     find_token(x1)
     df = pandas.DataFrame.from_records([t.to_dict() for t in Tokens])
     # print(df)
@@ -1242,7 +1274,7 @@ def Scan():
 
 
 button1 = tk.Button(text='Scan', command=Scan, bg='brown', fg='white', font=('helvetica', 9, 'bold'))
-canvas1.create_window(200, 180, window=button1)
+canvas1.create_window(200, 200 , window=button1)
 root.mainloop()
 
 
