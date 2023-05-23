@@ -456,14 +456,14 @@ class Editor(object):
     def dfa_string_create(self, query_text):
         dfa = VisualDFA(
             states={"q0", "q1", "q2", "qD"},
-            input_symbols={"[A-Z] | [a-z]", "[0-9]", ".| * | - | + | / | ; | : | _ | % | ( | ) | < | > | ="},
+            input_symbols={'"',"[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | ="},
             transitions={
-                "q0": {"[A-Z] | [a-z]": "q1", "[0-9]":"qD",  ".| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
-                "q1": {"[A-Z] | [a-z]": "q1", "[0-9]":"q1",  ".| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
-                "qD": {"[A-Z] | [a-z]": "qD", "[0-9]":"qD",  ".| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
+                "q0": {'"':"q1","[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =":"qD"},
+                "q1":  {'"':"q2","[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =":"q1"},
+                "qD":  {'"':"qD","[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =":"q1"}
             },
             initial_state="q0",
-            final_states={"q1"},
+            final_states={"q2"},
         )
         dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",
                          view=False)
@@ -556,28 +556,61 @@ class Editor(object):
         dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
         self.draw_DFA()
 # variable
-    def dfa_variable_createfinal(self):
+    def dfa_value_createfinal(self):
         print()
 
-    def dfa_variable_animate(self):
+    def dfa_value_animate(self):
         print()
 
-    def dfa_variable_create(self):
+    def dfa_value_create(self):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "qD"},
-            input_symbols={"_", "[A-Z]", "[a-z]", "[0-9]", "[. * - + / ; :  % ( ) < > = ]"},
+            input_symbols={"[a-z]", "[A-Z] | [0-9]", "[_ . * - + / ; :  % ( ) < > = ]"},
             transitions={
-                "q0": {"_": "q2", "[A-Z]": "q1", "[a-z]": "qD", "[0-9]": "qD", "[. * - + / ; :  % ( ) < > = ]": "qD"},
-                "q1": {"_": "q1", "[A-Z]": "q1", "[a-z]": "q1", "[0-9]": "q1", "[. * - + / ; :  % ( ) < > = ]": "qD"},
-                "q2": {"_": "q2", "[A-Z]": "q1", "[a-z]": "q1", "[0-9]": "qD", "[. * - + / ; :  % ( ) < > = ]": "qD"},
-                "qD": {"_": "qD", "[A-Z]": "qD", "[a-z]": "qD", "[0-9]": "qD", "[. * - + / ; :  % ( ) < > = ]": "qD"},
+                "q0": {"[a-z]": "q1", "[A-Z | [0-9]": "qD", "[_ . * - + / ; :  % ( ) < > = ]": "qD"},
+                "q1": {"[a-z]": "q1", "[A-Z | [0-9]": "q1", "[_ . * - + / ; :  % ( ) < > = ]": "qD"},
+                "qD": {"[a-z]": "qD", "[A-Z | [0-9]": "qD", "[_ . * - + / ; :  % ( ) < > = ]": "qD"},
 
             },
             initial_state="q0",
             final_states={"q1"},
         )
         dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+
+    def dfa_predname_create(self):
+        dfa = VisualDFA(
+            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
+            states={"q0", "q1", "qD"},
+            input_symbols={"[a-z]", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | ="},
+            transitions={
+                "q0": {"[a-z]": "q1", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | =": "qD"},
+                "q1": {"[a-z]": "q1", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | =": "qD"},
+                "qD": {"[a-z]": "qD", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | =": "qD"},
+
+            },
+            initial_state="q0",
+            final_states={"q1"},
+        )
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+
+    def dfa_variable_create(self):
+        dfa = VisualDFA(
+            # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
+            states={"q0", "q1", "q2", "qD"},
+            input_symbols={"_", "[A-Z]", "[a-z]", "[0-9] | .| * | - | + | / | ; | : \ % | ( | ) | < | > | = "},
+            transitions={
+                "q0": {"_": "q2", "[A-Z]": "q1", "[a-z]": "qD",  "[0-9] | .| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
+                "q1": {"_": "q1", "[A-Z]": "q1", "[a-z]": "q1",  "[0-9] | .| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
+                "q2": {"_": "q2", "[A-Z]": "q1", "[a-z]": "q1", "[0-9] | .| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
+                "qD": {"_": "qD", "[A-Z]": "qD", "[a-z]": "qD",  "[0-9] | .| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
+
+            },
+            initial_state="q0",
+            final_states={"q1"},
+        )
+        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+
 # comment
     def dfa_comment_createfinal(self):
         print()
