@@ -120,6 +120,7 @@ def split_token(text):
     MultiplyFlag=False
 
     for char in text:
+        #
         if colonFlag:
             if temp != "":
                 word1.append(temp)
@@ -140,6 +141,7 @@ def split_token(text):
                 temp = ""
             else:
                 word1.append(">")
+                temp = temp + char
             greaterThanFLag = False
 
         elif smallerThanFlag:
@@ -152,9 +154,10 @@ def split_token(text):
                 word1.append("<>")
             else:
                 word1.append("<")
+                temp = temp + char
             smallerThanFlag = False
 
-        elif DivisionFlag:
+        elif DivisionFlag: #  /  2
             if temp !="":
                 word1.append(temp)
                 temp=""
@@ -162,6 +165,7 @@ def split_token(text):
                 word1.append("/*")
             else:
                 word1.append("/")
+                temp = temp + char
             DivisionFlag=False
 
         elif MultiplyFlag:
@@ -172,6 +176,8 @@ def split_token(text):
                 word1.append("*/")
             else:
                 word1.append("*")
+                temp = temp + char
+
             MultiplyFlag=False
 
         elif char in ReservedWords:
@@ -212,6 +218,7 @@ def split_token(text):
         #         word1.append(char)
 
         else:
+            #any other char
             temp = temp + char
     if len(temp) > 0:
         word1.append(temp)
@@ -219,6 +226,7 @@ def split_token(text):
 
 def find_token(text):
    Tokens.clear()
+   errors.clear()
    tokens = split_token(text)
    for word in tokens:
     if word in ReservedWords:
@@ -265,15 +273,15 @@ def Parse():
 def Predicate(j):
     children = []
     output=dict()
-    out=Match(Token_type.predicate,j)           ## open when split work
+    out=Match(Token_type.predicate,j)
     children.append(out["node"])
-    out1 = Match(Token_type.space,out["index"])   #fix split
-    children.append(out1["node"])
-    Pre_dict = Pre(out1["index"])                 # out["index"]
+    out1 = Match(Token_type.space,out["index"])
+    #children.append(out1["node"])
+    Pre_dict = Pre(out1["index"])
     children.append(Pre_dict["node"])
     Node = Tree('Predicate',children)
     output["node"]=Node
-    output["index"]=Pre_dict["index"]# out["index"]
+    output["index"]=Pre_dict["index"]
     return output
 def Pre(j):
     output = dict()
@@ -324,7 +332,7 @@ def Prey(j) :
             out2 = Match(Token_type.closeBracket, Pl_dict["index"])
             children.append(out2["node"])
             out4 = Match(Token_type.space, out2["index"])
-            children.append(out4["node"])
+            #children.append(out4["node"])
             Y_dict = Y(out4["index"])
             children.append(Y_dict["node"])
             Node = Tree('Prey',children)
@@ -334,8 +342,8 @@ def Prey(j) :
         else:
             Y_dict = Y(j)
             children.append(Y_dict["node"])
-            out4 = Match(Token_type.space, Y_dict["index"])
-            children.append(out4["node"])
+      
+            #children.append(out4["node"])
             Node = Tree('Prey', children)
             output["node"] = Node
             output["index"] = out4["index"]
@@ -344,7 +352,7 @@ def Prey(j) :
         Y_dict = Y(j)
         children.append(Y_dict["node"])
         out4 = Match(Token_type.space, Y_dict["index"])
-        children.append(out4["node"])
+        #children.append(out4["node"])
         Node = Tree('Prey', children)
         output["node"] = Node
         output["index"] = out4["index"]
@@ -471,7 +479,7 @@ def Clause(j):
     out=Match(Token_type.clause,j)  ## open when split work
     children.append(out["node"])
     out1 = Match(Token_type.space, out["index"])  # fix split
-    children.append(out1["node"])
+   # children.append(out1["node"])
     C_dict = C(out1["index"])                    #out["index"]
     children.append(C_dict["node"])
     Node = Tree('Clause', children)
@@ -498,7 +506,7 @@ def Cx(j):
         out = Match(Token_type.End,j)
         children.append(out["node"])
         out1=Match(Token_type.space,out["index"])
-        children.append(out1["node"])
+        #children.append(out1["node"])
         Cxy_dict=Cxy(out1["index"])
         children.append(Cxy_dict["node"])
         Node = Tree('Cx', children)
@@ -513,11 +521,20 @@ def Cx(j):
         out1=Match(Token_type.End,B_dict["index"])
         children.append(out1["node"])
         out2=Match(Token_type.space,out1["index"])
-        children.append(out2["node"])
+        Cxy_dict = Cxy(out2["index"])
+        children.append(Cxy_dict["node"])
         Node = Tree('Cx', children)
         output["node"] = Node
-        output["index"] = out2["index"]
+        output["index"] = Cxy_dict["index"]
         return output
+    else:
+        out = Match(Token_type.End, j)
+        children.append(out["node"])
+        Node = Tree('Cx', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
+
 def Cxy(j):
     output=dict()
     children=[]
@@ -914,11 +931,11 @@ def Parameter(j):
     else:
         out = Match(Token_type.Identifier, j)
         children.append(out["node"])
-        V_dict = V(out["index"])
-        children.append(V_dict["node"])
+        # V_dict = V(out["index"])
+        # children.append(V_dict["node"])
         Node = Tree('Parameter', children)
         output["node"] = Node
-        output["index"] = V_dict["index"]
+        output["index"] = out["index"]
         return output
 
 def V(j):
@@ -928,7 +945,7 @@ def V(j):
         Temp = Tokens[j].to_dict()
         if(Temp['token_type'] == Token_type.spaceline):
             out1 = Match(Token_type.spaceline, j)
-            children.append(out1["node"])
+            #children.append(out1["node"])
             Parameter_dict=Parameter(out1["index"])
             children.append(Parameter_dict["node"])
             Node = Tree('V', children)
@@ -1162,7 +1179,7 @@ def Goal(j):
     out=Match(Token_type.goal,j)      ## open when split work
     children.append(out["node"])
     out1 = Match(Token_type.space, out["index"])  # fix split
-    children.append(out1["node"])
+   # children.append(out1["node"])
     G_dict=G(out1["index"])                          #out["index"]
     children.append(G_dict["node"])
     Node = Tree('Goal', children)
@@ -1192,12 +1209,19 @@ def G(j):
             output["node"] = Node
             output["index"] = Gpy_dict["index"]
             return output
+        else:
+            out = Match(Token_type.value, j)
+            children.append(out["node"])
+            Node = Tree('G', children)
+            output["node"] = Node
+            output["index"] = out["index"]
+            return output
     else:
         out = Match(Token_type.value, j)
         children.append(out["node"])
         Node = Tree('G', children)
         output["node"] = Node
-        output["index"] = j
+        output["index"] = out["index"]
         return output
 def Gpy(j):
     output = dict()
@@ -1342,6 +1366,14 @@ def Match(a, j):
             output["index"] = j
             return output
         else:
+            # v=j
+            # temp=Tokens[v].to_dict()
+            # for v in range(v,len(Tokens)-1):
+            #     if(temp['token_type']!=Token_type.space or temp['token_type']!= Token_type.End):
+            #         temp = Tokens[v].to_dict()
+            #     else:
+            #         break
+            # j=v
             output["node"] = ["error"]
             output["index"] = j + 1
             errors.append("Syntax error : " + Temp['Lex'] + " Expected dot")
@@ -1352,30 +1384,45 @@ def Match(a, j):
         return output
 
 
-# GUI
-root = tk.Tk()
+# # GUI
+# root = tk.Tk()
+#
+# canvas1 = tk.Canvas(root, width=400, height=300, relief='raised')
+# canvas1.pack()
+#
+# label1 = tk.Label(root, text='GETTING BULLIED BY COMPILER')
+# label1.config(font=('helvetica', 14))
+# canvas1.create_window(200, 25, window=label1)
+#
+# label2 = tk.Label(root, text='FUCK MY LIFE :')
+# label2.config(font=('Times new Roman', 10))
+# canvas1.create_window(200, 100, window=label2)
+#
+# entry1 = tk.Text(root, width=70,  height=10, padx=10, pady=10)
+# canvas1.create_window(200, 300, window=entry1)
 
-canvas1 = tk.Canvas(root, width=400, height=300, relief='raised')
-canvas1.pack()
 
-label1 = tk.Label(root, text='Scanner Phase')
-label1.config(font=('helvetica', 14))
-canvas1.create_window(200, 25, window=label1)
+def Scan(x1):
+    # x1 = entry1.get(1.0, "end-1c")
+    # x4 = []
+    # temp = ""
+    #
+    # for i in  range(len(x1)):
+    #     if (x1[i] == "\n" and x1[i+1] != "\n" and  x1[i] == '.'):
+    #         print()
+    #     else:
+    #         x4.append(x1[i])
+    #
+    # for j in range(len(x4)):
+    #     if (x4[j] != "\n"):
+    #         temp = temp + x4[j]
+    #
+    # print(temp)
 
-label2 = tk.Label(root, text='Source code:')
-label2.config(font=('Times new Roman', 10))
-canvas1.create_window(200, 100, window=label2)
-
-entry1 = tk.Text(root, width=50,  height=10, padx=10, pady=10)
-canvas1.create_window(200, 300, window=entry1)
-
-
-def Scan():
-    x1 = entry1.get(1.0, "end-1c")
-    print(x1)
     find_token(x1)
     df = pandas.DataFrame.from_records([t.to_dict() for t in Tokens])
     # print(df)
+
 
     # to display token stream as table
     dTDa1 = tk.Toplevel()
@@ -1401,9 +1448,9 @@ def Scan():
     # canvas1.create_window(200, 230, window=label4)
 
 
-button1 = tk.Button(text='Scan', command=Scan, bg='brown', fg='white', font=('helvetica', 9, 'bold'))
-canvas1.create_window(200, 200 , window=button1)
-root.mainloop()
+# button1 = tk.Button(text='Scan', command=Scan, bg='brown', fg='white', font=('helvetica', 9, 'bold'))
+# canvas1.create_window(200, 200 , window=button1)
+# root.mainloop()
 
 
 
