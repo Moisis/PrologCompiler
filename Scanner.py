@@ -1233,12 +1233,26 @@ def G(j):
 def Gp(j):
     output=dict()
     children=[]
-    children.append("Error")
-    Node = Tree('Gp', children)
-    output["node"] = Node
-    output["index"] = j
-    return output
-
+    if (j < len(Tokens)):
+        temp = Tokens[j].to_dict()
+        if (temp['token_type'] == Token_type.predicate_name):
+            children.append("Error")
+            Node = Tree('Gp', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+        else:
+            children.append("Epsilon")
+            Node = Tree('Gp', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Gp', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
 
 
 
