@@ -1230,30 +1230,6 @@ def G(j):
         output["node"] = Node
         output["index"] = out["index"]
         return output
-def Gp(j):
-    output=dict()
-    children=[]
-    if (j < len(Tokens)):
-        temp = Tokens[j].to_dict()
-        if (temp['token_type'] == Token_type.predicate_name):
-            children.append("Error")
-            Node = Tree('Gp', children)
-            output["node"] = Node
-            output["index"] = j
-            return output
-        else:
-            children.append("Epsilon")
-            Node = Tree('Gp', children)
-            output["node"] = Node
-            output["index"] = j
-            return output
-    else:
-        children.append("Epsilon")
-        Node = Tree('Gp', children)
-        output["node"] = Node
-        output["index"] = j
-        return output
-
 
 
 def Gpy(j):
@@ -1270,20 +1246,16 @@ def Gpy(j):
             children.append(out2["node"])
             out3 = Match(Token_type.End, out2["index"])
             children.append(out3["node"])
-            Gp_dict=Gp(out3["index"])
-            children.append(Gp_dict["node"])
             Node = Tree('Gpy', children)
             output["node"] = Node
-            output["index"] = Gp_dict["index"]
+            output["index"] = out3["index"]
             return output
         elif(temp['token_type'] == Token_type.End):
             out3 = Match(Token_type.End, j)
             children.append(out3["node"])
-            Gp_dict = Gp(out3["index"])
-            children.append(Gp_dict["node"])
             Node = Tree('Gpy', children)
             output["node"] = Node
-            output["index"] = Gp_dict["index"]
+            output["index"] = out3["index"]
             return output
         else:
             out1 = Match(Token_type.openBracket, j)

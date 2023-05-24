@@ -169,8 +169,6 @@ class Editor(object):
 
     def create_Function_menu(self, menu_bar):
 
-
-
         functionmenu = Menu(menu_bar, tearoff=0)
 
         functionmenu.add_command(
@@ -215,8 +213,7 @@ class Editor(object):
 
     def create_Function2_menu(self, menu_bar):
 
-        ##VARIABLE PREDNAME SYMBOL CHAR STRING SPECIAL
-        # menubar = Menu(root)
+
         functionmenu2 = Menu(menu_bar, tearoff=0)
 
         functionmenu2.add_command(
@@ -883,13 +880,12 @@ class Editor(object):
     def dfa_value_create(self, string_query):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
-            states={"q0", "q1", "q2", "qD"},
+            states={"q0", "q1", "qD"},
             input_symbols={"a", "Z", "!"},
             transitions={
                 "q0": {"a": "q1", "Z": "qD", "!": "qD"},
                 "q1": {"a": "q1", "Z": "q1", "!": "qD"},
                 "qD": {"a": "qD", "Z": "qD", "!": "qD"},
-
             },
             initial_state="q0",
             final_states={"q1"},
@@ -1250,20 +1246,38 @@ class Editor(object):
 
     def run_query(self):
         code = self.rule_editor.get(1.0, "end-1c")
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.open_file1("test-graphs/Final grammer.txt" )
+        self.diagrambox.config(state=DISABLED)
         self.set_not_busy()
         Scanner.Scan(code)
         self.set_busy()
 
-
+    def write_editor_text_to_file(self, file):
+        editor_text = self.rule_editor.get(1.0, "end-1c")
+        file.write(bytes(editor_text, "UTF-8"))
+        self.rule_editor.edit_modified(False)
 
     def handle_exception(self):
         self.set_not_busy()
 
+    def set_rule_editor_text2(self, text):
+        self.diagrambox.delete(1.0, "end")
+        self.diagrambox.insert(1.0, text)
+        self.diagrambox.edit_modified(False)
     def set_rule_editor_text(self, text):
         self.rule_editor.delete(1.0, "end")
         self.rule_editor.insert(1.0, text)
         self.rule_editor.edit_modified(False)
 
+    def open_file1(self, file_path=None):
+        if is_file_path_selected(file_path):
+            file_contents = get_file_contents(file_path)
+
+            # Set the rule editor text to contain the selected file contents
+            self.set_rule_editor_text2(file_contents)
+            self.file_path = file_path
     def open_file(self, file_path=None):
 
         # Open a a new file dialog which allows the user to select a file to open
@@ -1319,7 +1333,8 @@ if __name__ == "__main__":
     root.tk.call("source", "Themes/azure.tcl")
     root.tk.call("set_theme", "dark")
     editor = Editor(root)
-    root.iconbitmap("assets/icons8-python-96.ico")
+    root.iconbitmap("assets/file_type_prolog_icon_130230.ico")
+    # root.iconbitmap("assets/logooooooooooooo.ico")
     myappid = 'PrologInterpreter'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     # Don't allow users to re-size the editor

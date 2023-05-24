@@ -1,0 +1,50 @@
+main-> Predicate Clause Goal
+Predicate->predicates Pre 
+Pre->p_Name Prey|E
+Prey->(Pl) Y| Y
+Y->pre|E
+Pl->Data Ply
+Ply->,X|E
+X->Pl
+Data->datatype
+----------------------------------------------------------------------------------------
+Clause->clause C
+C->Cl Cx
+Cx->. Cxy|:-B.Cxy  
+B->Body By
+By->,B|;B|E      
+Cxy->C|E
+Cl->p_Name Cly
+Cly->(Ids)|E
+Ids->Cldata Idsy
+Idsy->,Clx|E
+Clx->Ids
+Cldata->variable|value|real|integer
+----------------------------------------------------------------------------
+Body->BuiltFunction |Expression|RelationExpression|Comment
+BuiltFunction-> readint(variable)|write("Parameter")
+Parameter->variable V|value V|Operators V|Relationaloperators V
+V->Parameter|E
+Operators-> +|-|*|/|=
+Relationaloperators-> >|<|>=|<=
+Expression->variable Operators Expressionx 
+Expressionx->Expression|DataExp
+DataExp-> real|integer|Variable
+RelationExpression->variable Relationaloperators RelationExpressionx
+RelationExpressionx->Expression|DataExp
+Comment->/*Parameter*/ | %Parameter
+-----------------------------------------------------------------------
+Goal-> goal G
+G-> p_Name Gpy
+Gpy->(Gpl).|.
+Gpl->Vardata Gply
+Gply->,D|E
+D->Gpl
+Vardata->variable,value
+
+
+
+
+
+
+
