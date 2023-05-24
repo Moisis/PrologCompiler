@@ -1,12 +1,13 @@
-import os
+
 import time
 from tkinter import *
-from tkinter import ttk, filedialog
+from tkinter import filedialog
 from tkinter.scrolledtext import ScrolledText
 import ctypes
 from PIL import Image, ImageTk
 from visual_automata.fa.dfa import VisualDFA
 import Scanner
+
 
 
 def is_file_path_selected(file_path):
@@ -65,11 +66,6 @@ class Editor(object):
 
         self.rule_editor.focus()
 
-        # Create a query label:
-
-        # self.query_label = Label(root, text="Prolog Query:", padx=10, pady=1)
-        #
-        # self.query_label.grid(sticky=W, row=2, column=0, columnspan=2, pady=3)
 
         # Create a Dfa label:
 
@@ -77,13 +73,6 @@ class Editor(object):
 
         self.query_label.grid(sticky=W, row=0, column=4, pady=3)
 
-        # Create the Prolog query editor we'll use to query our rules:
-
-        # self.query_editor = Text(root, width=77, height=2, padx=10, pady=10)
-        #
-        # self.query_editor.grid(sticky=W, row=3, column=0, pady=3, padx=10)
-        #
-        # self.query_editor.config(wrap="word", undo=True)
 
         # Create a run button which runs the query against our rules and outputs the
         # results in our solutions text box / editor.
@@ -95,52 +84,10 @@ class Editor(object):
             width=20,
             command=self.run_query,
         )
-        # self.drawdfabutton = Button(
-        #     root,
-        #     text="Start Animation",
-        #     height=2,
-        #     width=30,
-        #     command=self.drawStepbystep,
-        # )
-        # self.drawparsetree = Button(
-        #     root,
-        #     text="Draw Parse tree",
-        #     height=2,
-        #     width=20,
-        #     command=self.draw_ParseTree,
-        # )
-        # self.resetanima = Button(
-        #     root,
-        #     text="Reset Diagram",
-        #     height=2,
-        #     width=20,
-        #     command=self.resetanimation,
-        # )
+
 
         self.run_button.grid(sticky=E, row=3, column=0, padx=10)
-        # self.drawdfabutton.grid(sticky=E, row=3, column=2, pady=3, padx=10)
-        # self.drawparsetree.grid(sticky=E, row=4, column=2, pady=3, padx=10)
-        # self.resetanima.grid(sticky=E, row=3, column=3, pady=3, padx=10)
 
-        # Create a solutions label
-
-        # self.solutions_label = Label(
-        #     root, text="Query Solutions:", padx=10, pady=1
-        # )
-
-        # self.solutions_label.grid(
-        #     sticky="W", row=4, column=0, columnspan=2, padx=10, pady=3
-        # )
-
-        # Create a text box which we'll use to display our Prolog query solutions:
-        #
-        # self.solutions_display = ScrolledText(
-        #     root, width=100, height=5, padx=10, pady=10
-        # )
-        #
-        # self.solutions_display.grid(
-        #     row=5, column=0, columnspan=2, padx=10, pady=7
-        # )
 
         image = Image.open('test-graphs/darkmodedfa.png')
         photo = ImageTk.PhotoImage(image)
@@ -173,6 +120,7 @@ class Editor(object):
         # Finally, let's create the file menu
         self.menu_bar = self.create_file_menu(menu_bar)
         self.menu_bar = self.create_Function_menu(menu_bar)
+        self.menu_bar = self.create_Function2_menu(menu_bar)
         self.menu_bar = self.create_options_menu(menu_bar)
 
     def create_file_menu(self, menu_bar):
@@ -220,24 +168,11 @@ class Editor(object):
         return menu_bar
 
     def create_Function_menu(self, menu_bar):
-        ##VARIABLE PREDNAME SYMBOL CHAR STRING SPECIAL BUTTONS REQUIRED MY HACKAR <3
 
-        """Create a menu for night mode  """
-        # menubar = Menu(root)
+
+
         functionmenu = Menu(menu_bar, tearoff=0)
 
-        # functionmenu.add_command(
-        #     label="Draw final DFA", underline=1, command=self.drawfinalDFA
-        # )
-        #
-        # functionmenu.add_command(
-        #     label="Cycle Through DFA animation", underline=1, command=self.drawStepbystep
-        # )
-        # functionmenu.add_separator()
-        # functionmenu.add_command(
-        #     label="Draw Parse Tree", underline=1, command=self.draw_ParseTree
-        # )
-        # functionmenu.add_separator()
         functionmenu.add_command(
             label="dfa_arithmetic_create", underline=1, command=self.dfa_arithmetic_createfinal
         )
@@ -267,13 +202,6 @@ class Editor(object):
             label="dfa_real_animate", underline=1, command=self.dfa_real_animate
         )
         functionmenu.add_separator()
-        # functionmenu.add_command(
-        #     label="dfa_variable_create", underline=1, command=self.dfa_variable_createfinal
-        # )
-        # functionmenu.add_command(
-        #     label="dfa_variable_animate", underline=1, command=self.dfa_variable_animate
-        # )
-        # functionmenu.add_separator()
         functionmenu.add_command(
             label="dfa_comment_create", underline=1, command=self.dfa_comment_createfinal
         )
@@ -282,6 +210,59 @@ class Editor(object):
         )
 
         menu_bar.add_cascade(label="DFAS 1", underline=0, menu=functionmenu)
+        self.root.config(menu=menu_bar)
+        return menu_bar
+
+    def create_Function2_menu(self, menu_bar):
+
+        ##VARIABLE PREDNAME SYMBOL CHAR STRING SPECIAL
+        # menubar = Menu(root)
+        functionmenu2 = Menu(menu_bar, tearoff=0)
+
+        functionmenu2.add_command(
+            label="dfa_VARIABLE_create", underline=1, command=self.dfa_variable_createfinal
+        )
+        functionmenu2.add_command(
+            label="dfa_VARIABLE_animate", underline=1, command=self.dfa_variable_animate
+        )
+        functionmenu2.add_separator()
+
+        functionmenu2.add_command(
+            label="dfa_PREDNAME _create", underline=1, command=self.dfa_predname_createfinal
+        )
+        functionmenu2.add_command(
+            label="dfa_PREDNAME _animate", underline=1, command=self.dfa_predname_animate
+        )
+        functionmenu2.add_separator()
+        functionmenu2.add_command(
+            label="dfa_SYMBOL_create", underline=1, command=self.dfa_value_createfinal
+        )
+        functionmenu2.add_command(
+            label="dfa_SYMBOL_animate", underline=1, command=self.dfa_value_animate
+        )
+        functionmenu2.add_separator()
+        functionmenu2.add_command(
+            label="dfa_CHAR_create", underline=1, command=self.dfa_char_createfinal
+        )
+        functionmenu2.add_command(
+            label="dfa_CHAR_animate", underline=1, command=self.dfa_char_animate
+        )
+        functionmenu2.add_separator()
+        functionmenu2.add_command(
+            label="dfa_STRING_create", underline=1, command=self.dfa_string_createfinal
+        )
+        functionmenu2.add_command(
+            label="dfa_STRING_animate", underline=1, command=self.dfa_string_animate
+        )
+        functionmenu2.add_separator()
+        functionmenu2.add_command(
+            label="dfa_SPECIAL_create", underline=1, command=self.dfa_special_createfinal
+        )
+        functionmenu2.add_command(
+            label="dfa_SPECIAL _animate", underline=1, command=self.dfa_special_animate
+        )
+
+        menu_bar.add_cascade(label="DFAS 2", underline=0, menu=functionmenu2)
         self.root.config(menu=menu_bar)
         return menu_bar
 
@@ -317,68 +298,10 @@ class Editor(object):
         self.label1.config(image=photo1)
         self.label1.image = photo1
 
-    # test sample
-    def drawfinalDFA(self):
 
-        query_text = self.diagrambox.get(1.0, "end-1c")
-        self.dfa_create(query_text)
-        self.draw_DFA()
-
-        # Picture Holder
-
-        photo1 = ImageTk.PhotoImage(Image.open('test-graphs/Digraph.png'))
-        self.label1.config(image=photo1)
-        self.label1.image = photo1
-
-    def draw_ParseTree(self):
-        print()
-
-    def resetanimation(self):
-        photo1 = ImageTk.PhotoImage(Image.open('test-graphs/original.png'))
-        self.label1.config(image=photo1)
-        self.label1.image = photo1
-
-    def drawStepbystep(self):
-        # f()
-        self.lol += 1
-        query_text = self.diagrambox.get(1.0, "end-1c")
-        if self.lol > (len(query_text)):
-            self.lol = 0
-
-        else:
-            query1 = ""
-            for i in range(self.lol):
-                query1 = query1 + query_text[i]
-                print(query1)
-                self.dfa_create(query1)
-                self.draw_DFA()
-            time.sleep(0.8)
-            root.update()
-            self.drawStepbystep()
-
-    def dfa_create(self, query_text):
-        dfa = VisualDFA(
-            states={"q0", "q1", "q2", "q3", "q4"},
-            input_symbols={"0", "1"},
-            transitions={
-                "q0": {"0": "q3", "1": "q1"},
-                "q1": {"0": "q3", "1": "q2"},
-                "q2": {"0": "q3", "1": "q2"},
-                "q3": {"0": "q4", "1": "q1"},
-                "q4": {"0": "q4", "1": "q1"},
-            },
-            initial_state="q0",
-            final_states={"q2", "q4"},
-        )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
     # arth
     def animatearthmetic(self):
-        alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-        alphabetsmall = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
-                         't', 'u', 'v', 'w', 'x', 'y', 'z']
-        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         arthemticoperators = ['*', '/', '+', '-']
 
         self.diagrambox.config(state=NORMAL)
@@ -435,18 +358,14 @@ class Editor(object):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   < >
             states={"q0", "q1", "qD"},
-            # input_symbols={"* / + -", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]"},
+
             input_symbols={"P", "L"},
             transitions={
-                # "q0": {"* / + -": "q1", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]": "qD"},
-                # "q1": {"* / + -": "qD", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]": "qD"},
-                #  "qD": {"* / + -": "qD", "[A-Z a-z 0-9 .  ; : _ % ( ) < > = ]": "qD"},
+
                 "q0": {"P": "q1", "L": "qD"},
                 "q1": {"P": "qD", "L": "qD"},
                 "qD": {"P": "qD", "L": "qD"},
-                # "q0": {"a": "q1", "b": "qD"},
-                # "q1": {"a": "qD", "b": "qD"},
-                # "qD": {"a": "qD", "b": "qD"},
+
             },
             initial_state="q0",
             final_states={"q1"},
@@ -457,12 +376,12 @@ class Editor(object):
     def dfa_char_create(self, query_text):
         dfa = VisualDFA(
             states={"q0", "q1", "qD"},
-            input_symbols={"[A-Z] | [a-z]", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | ="},
+            input_symbols={"C", "!"},
             transitions={
 
-                "q0": {"[A-Z] | [a-z]": "q1", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
-                "q1": {"[A-Z] | [a-z]": "qD", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
-                "qD": {"[A-Z] | [a-z]": "qD", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
+                "q0": {"C": "q1", "!": "qD"},
+                "q1": {"C": "qD", "!": "qD"},
+                "qD": {"C": "qD", "!": "qD"},
 
             },
             initial_state="q0",
@@ -487,7 +406,7 @@ class Editor(object):
         query3 = ''
         for i in range(len(query2)):
             if (query2[i] in alphabetcaps or query2[i] in alphabetsmall):
-                query3 = query3 + query2[i]
+                query3 = query3 + 'C'
             else:
                 query3 = query3 + '!'
 
@@ -504,7 +423,7 @@ class Editor(object):
 
         self.diagrambox.config(state=NORMAL)
         self.diagrambox.delete("1.0", END)
-        self.diagrambox.insert(END, "Operaters(O) : [A-Z] [a-z] ")
+        self.diagrambox.insert(END, "Characters(C) : [A-Z] [a-z] \n")
         self.diagrambox.insert(END, "Others(!) : [0-9] | . | ; | : | _ | % | ( | ) | * | / | + | -")
         self.diagrambox.config(state=DISABLED)
         query = self.legend.get(1.0, "end-1c")
@@ -518,7 +437,7 @@ class Editor(object):
             quert = ""
             for i in range(self.charCounter):
                 if (query[i] in alphabetsmall or query[i] in alphabetcaps):
-                    quert = quert + query[i]
+                    quert = quert + 'C'
                     print(quert)
                     self.dfa_char_create(quert)
                     self.draw_DFA()
@@ -537,11 +456,12 @@ class Editor(object):
     def dfa_string_create(self, query_text):
         dfa = VisualDFA(
             states={"q0", "q1", "q2", "qD"},
-            input_symbols={'\"', "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | ="},
+            input_symbols={'\"', "!"},
             transitions={
-                "q0": {'\"': "q1", "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
-                "q1": {'\"': "q2", "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =": "q1"},
-                "qD": {'\"': "qD", "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"}
+                "q0": {'\"': "q1", "!": "qD"},
+                "q1": {'\"': "q2", "!": "q1"},
+                "q2": {'\"': "q2", "!": "q1"},
+                "qD": {'\"': "qD", "!": "qD"}
 
             },
             initial_state="q0",
@@ -549,12 +469,11 @@ class Editor(object):
         )
         dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-        def dfa_string_createfinal(self):
+    def dfa_string_createfinal(self):
             self.diagrambox.config(state=NORMAL)
             self.diagrambox.delete("1.0", END)
             self.diagrambox.insert(END, "String Operaters(S) : \"")
-            self.diagrambox.insert(END,
-                                   "Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | * | / | + | -")
+            self.diagrambox.insert(END,"Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | * | / | + | -")
             self.diagrambox.config(state=DISABLED)
             query2 = self.legend.get(1.0, "end-1c")
             if (query2 == ''):
@@ -570,7 +489,7 @@ class Editor(object):
             self.dfa_string_create(query3)
             self.draw_DFA()
 
-        def dfa_string_animate(self):
+    def dfa_string_animate(self):
 
             stringOperators = ['\"']
 
@@ -1045,7 +964,7 @@ class Editor(object):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "qD"},
-            input_symbols={"[a-z]", "!"},
+            input_symbols={"a", "!"},
             transitions={
                 "q0": {"a": "q1", "!": "qD"},
                 "q1": {"a": "q1", "!": "qD"},
@@ -1141,12 +1060,6 @@ class Editor(object):
                     print(quert)
                     self.dfa_variable_create(quert)
                     self.draw_DFA()
-
-            #            if (query2[i] in lowercase):
-            #                 query3 = query3 + query2[i]
-            #             elif (query2[i] in uppercase or query2[i] in nums):
-            #                 query3 = query3 + query2[i]
-
             time.sleep(0.8)
             root.update()
             self.dfa_variable_animate()
@@ -1175,7 +1088,7 @@ class Editor(object):
             states={"q0", "q1", "q2", "qD"},
             input_symbols={"S", ":", "-", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | ="},
             transitions={
-                "q0": {"S": "q1", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
+                "q0": {"S": "q1", ":": "q2", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
                 "q1": {"S": "qD", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
                 "q2": {"S": "qD", ":": "qD", "-": "q2", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
                 "qD": {"S": "qD", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
@@ -1337,24 +1250,19 @@ class Editor(object):
 
     def run_query(self):
         code = self.rule_editor.get(1.0, "end-1c")
-        print(code)
+        self.set_not_busy()
         Scanner.Scan(code)
+        self.set_busy()
 
 
 
+    def handle_exception(self):
+        self.set_not_busy()
 
-
-    # def handle_exception(self, error_message, exception=""):
-    #     """Handle the exception by printing an error message as well as exception in
-    #     our solution text editor / display """
-    #     self.solutions_display.insert(END, error_message + "\n")
-    #     self.solutions_display.insert(END, str(exception) + "\n")
-    #     self.set_not_busy()
-
-    # def set_rule_editor_text(self, text):
-    #     self.rule_editor.delete(1.0, "end")
-    #     self.rule_editor.insert(1.0, text)
-    #     self.rule_editor.edit_modified(False)
+    def set_rule_editor_text(self, text):
+        self.rule_editor.delete(1.0, "end")
+        self.rule_editor.insert(1.0, text)
+        self.rule_editor.edit_modified(False)
 
     def open_file(self, file_path=None):
 
@@ -1370,8 +1278,6 @@ class Editor(object):
             self.file_path = file_path
 
     def save_file(self):
-        """If we have specified a file path, save the file - otherwise, prompt the
-        user to specify the file location prior to saving the file """
         if self.file_path is None:
             result = self.save_file_as()
         else:
@@ -1379,10 +1285,6 @@ class Editor(object):
 
         return result
 
-    def write_editor_text_to_file(self, file):
-        editor_text = self.rule_editor.get(1.0, "end-1c")
-        file.write(bytes(editor_text, "UTF-8"))
-        self.rule_editor.edit_modified(False)
 
     def save_file_as(self, file_path=None):
         # If there is no file path specified, prompt the user with a dialog which
@@ -1410,8 +1312,6 @@ class Editor(object):
     def undo(self):
         self.rule_editor.edit_undo()
 
-    def redo(self):
-        self.rule_editor.edit_redo()
 
 
 if __name__ == "__main__":
