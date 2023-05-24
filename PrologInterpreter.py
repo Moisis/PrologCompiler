@@ -466,6 +466,70 @@ class Editor(object):
                 final_states={"q1"},
             )
             dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",view=False)
+
+    def dfa_char_createfinal(self):
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Characters(C): [A-Z] [a-z]")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | . | ; | : | _ | % | ( | ) | < | > | =")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_char_create(query2)
+        alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+        alphabetsmall = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in alphabetcaps or query2[i] in alphabetsmall):
+                query3 = query3 + query2[i]
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_char_create(query3)
+        self.draw_DFA()
+
+    def dfa_char_animate(self):
+
+        alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+        alphabetsmall = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Operaters(O) : [A-Z] [a-z] ")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | . | ; | : | _ | % | ( | ) | * | / | + | -")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_char_create(query)
+            self.draw_DFA()
+        self.charCounter += 1
+        if self.charCounter > (len(query)):
+            self.charcounter = 0
+        else:
+            quert = ""
+            for i in range(self.charCounter):
+                if (query[i] in alphabetsmall or query[i] in alphabetcaps):
+                    quert = quert + query[i]
+                    print(quert)
+                    self.dfa_char_create(quert)
+                    self.draw_DFA()
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_char_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_char_animate()
+
+
 #string
 
     def dfa_string_create(self, query_text):
@@ -481,8 +545,86 @@ class Editor(object):
             initial_state="q0",
             final_states={"q2"},
         )
-        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",
-                         view=False)
+        dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
+
+        def dfa_string_createfinal(self):
+            self.diagrambox.config(state=NORMAL)
+            self.diagrambox.delete("1.0", END)
+            self.diagrambox.insert(END, "String Operaters(S) : \"")
+            self.diagrambox.insert(END,
+                                   "Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | * | / | + | -")
+            self.diagrambox.config(state=DISABLED)
+            query2 = self.legend.get(1.0, "end-1c")
+            if (query2 == ''):
+                self.dfa_string_create(query2)
+            stringoperators = ['\"']
+            query3 = ''
+            for i in range(len(query2)):
+                if (query2[i] in stringoperators):
+                    query3 = query3 + "\""
+                else:
+                    query3 = query3 + '!'
+
+            self.dfa_string_create(query3)
+            self.draw_DFA()
+
+        def dfa_string_animate(self):
+
+            stringOperators = ['\"']
+
+            self.diagrambox.config(state=NORMAL)
+            self.diagrambox.delete("1.0", END)
+            self.diagrambox.insert(END, "String(S) : \"")
+            self.diagrambox.insert(END,
+                                   "Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | * | / | + | - \n")
+            self.diagrambox.config(state=DISABLED)
+            query = self.legend.get(1.0, "end-1c")
+            if (query == ''):
+                self.dfa_string_create(query)
+                self.draw_DFA()
+            self.stringcounter += 1
+            if self.stringcounter > (len(query)):
+                self.stringcounter = 0
+            else:
+                quert = ""
+                for i in range(self.stringcounter):
+                    if (query[i] in stringOperators):
+                        quert = quert + "\""
+                        print(quert)
+                        self.dfa_string_create(quert)
+                        self.draw_DFA()
+                    else:
+                        quert = quert + '!'
+                        print(quert)
+                        self.dfa_string_create(quert)
+                        self.draw_DFA()
+
+                time.sleep(0.8)
+                root.update()
+                self.dfa_string_animate()
+        # Relational
+
+    def dfa_relational_createfinal(self):
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "String Operaters(S) : \"")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | * | / | + | -")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_string_create(query2)
+        stringoperators = ['\"']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in stringoperators):
+                query3 = query3 + query2[i]
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_string_create(query3)
+        self.draw_DFA()
+
+
 
 # Relational
     def dfa_relational_createfinal(self):
@@ -653,11 +795,67 @@ class Editor(object):
         dfa.show_diagram(input_str=string_query,filename='Digraph', format_type="png", path="test-graphs", view=False)
 # real
     def dfa_real_createfinal(self):
-        print()
+            self.diagrambox.config(state=NORMAL)
+            self.diagrambox.delete("1.0", END)
+            self.diagrambox.insert(END, "Numbers (N) : 0-9 . \n")
+            self.diagrambox.insert(END, "Others(!) :  [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+            self.diagrambox.config(state=DISABLED)
+            query2 = self.legend.get(1.0, "end-1c")
+            if (query2 == ''):
+                self.dfa_real_create(query2)
+            nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            query3 = ''
+            for i in range(len(query2)):
+                if (query2[i] in nums):
+                    query3 = query3 + 'N'
+                elif(query2[i]=='.'):
+                    query3 = query3 + '.'
+                else:
+                    query3 = query3 + '!'
+
+            self.dfa_real_create(query3)
+            self.draw_DFA()
 
     def dfa_real_animate(self):
-        print()
-    def dfa_real_create(self):
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Numbers(N) : 0-9 \n")
+        self.diagrambox.insert(END, "Others(!): [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_real_create(query)
+            self.draw_DFA()
+        self.realcounter += 1
+        if self.realcounter > (len(query)):
+            self.realcounter = 0
+        else:
+            quert = ""
+            for i in range(self.realcountercounter):
+                if (query[i] in nums):
+                    quert = quert + 'N'
+                    print(quert)
+                    self.dfa_real_create(quert)
+                    self.draw_DFA()
+
+                elif (query[i] == '.'):
+                    quert = quert + '.'
+                    print(quert)
+                    self.dfa_real_create(quert)
+                    self.draw_DFA()
+
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_real_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_real_animate()
+    def dfa_real_create(self, query_string):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "qD"},
@@ -970,6 +1168,7 @@ class Editor(object):
         dfa.show_diagram(input_str=query_string, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
     def dfa_special_create(self, query_text):
+
             dfa = VisualDFA(
                 states={"q0", "q1", "q2", "qD"},
                 input_symbols={"S", ":","-","[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | ="},
@@ -983,16 +1182,136 @@ class Editor(object):
                 initial_state="q0",
                 final_states={"q1","q2"},
             )
-            dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",view=False)
 
+            dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
+    def dfa_special_createfinal(self):
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Special Characters (S) : - ;  .  ,  (  )")
+        self.diagrambox.insert(END,
+                               "Others(X) : [0-9] [A-Z] | [a-z] | _ | % | ( | ) | < | > | = | + | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_comment_create(query2)
+        specialoperators = [';', '.', ',', '(', ')']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in specialoperators):
+                query3 = query3 + 'S'
+            elif query2[i] == ':':
+                query3 = query3 + ':'
+
+            elif query2[i] == '-':
+                query3 = query3 + '-'
+
+            else:
+                query3 = query3 + 'X'
+
+        self.dfa_special_create(query3)
+        self.draw_DFA()
+
+    def dfa_special_animate(self):
+        specialoperators = [';', '.', ',', '(', ')']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Special Characters(S) : : - ;  .  ,  (  )")
+        self.diagrambox.insert(END, "Others(!): [A-Z] | [a-z] | _ | % | ( | ) | < | > | = | + | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_special_create(query)
+            self.draw_DFA()
+        self.specialcounter += 1
+        if self.specialcounter > (len(query)):
+            self.specialcounter = 0
+        else:
+            quert = ""
+            for i in range(self.specialcounter):
+                if (query[i] in specialoperators):
+                    quert = quert + 'S'
+                    print(quert)
+                    self.dfa_special_create(quert)
+                    self.draw_DFA()
+
+                elif query[i] == ':':
+                    quert = quert + ':'
+                    print(quert)
+                    self.dfa_special_create(quert)
+                    self.draw_DFA()
+
+                elif query[i] == '-':
+                    quert = quert + '-'
+                    print(quert)
+                    self.dfa_special_create(quert)
+                    self.draw_DFA()
+                else:
+                    quert = quert + 'X'
+                    print(quert)
+                    self.dfa_special_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_special_animate()
 # comment
     def dfa_comment_createfinal(self):
-        print()
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Comment Operators (C) : % / * \n")
+        self.diagrambox.insert(END,
+                               "Others(X) : [0-9] [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_comment_create(query2)
+        commentoperators = ['*', '/', '%']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in commentoperators):
+                query3 = query3 + commentoperators[i]
+            else:
+                query3 = query3 + 'X'
+
+        self.dfa_comment_create(query3)
+        self.draw_DFA()
 
     def dfa_comment_animate(self):
-        print()
-    def dfa_comment_create(self):
+        commentoperators = ['*', '/', '%']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Numbers(N) : 0-9 \n")
+        self.diagrambox.insert(END, "Others(!): [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_comment_create(query)
+            self.draw_DFA()
+        self.commcounter += 1
+        if self.commcounter > (len(query)):
+            self.commcounter = 0
+        else:
+            quert = ""
+            for i in range(self.commcounter):
+                if (query[i] in commentoperators):
+                    quert = quert + query[i]
+                    print(quert)
+                    self.dfa_comment_create(quert)
+                    self.draw_DFA()
+                else:
+                    quert = quert + 'X'
+                    print(quert)
+                    self.dfa_comment_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_comment_animate()
+
+    def dfa_comment_create(self,query_string):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "q4", "q5", "q6" "qD"},
