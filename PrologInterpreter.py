@@ -29,6 +29,17 @@ class Editor(object):
         self.root.title("Prolog Interpreter")
         self.lol = 0
         self.arthcounter = 0
+        self.relcounter=0
+        self.intcounter=0
+        self.realcounter=0
+        self.commcounter=0
+        self.varcounter=0
+        self.valuecounter=0 #done
+        self.prednamecounter=0 #done
+        self.stringcounter=0 #done
+        self.specialcounter=0
+        self.charCounter = 0#
+
 
         # Create a rule label
 
@@ -211,6 +222,8 @@ class Editor(object):
         return menu_bar
 
     def create_Function_menu(self, menu_bar):
+        ##VARIABLE PREDNAME SYMBOL CHAR STRING SPECIAL BUTTONS REQUIRED MY HACKAR <3
+
         """Create a menu for night mode  """
         # menubar = Menu(root)
         functionmenu = Menu(menu_bar, tearoff=0)
@@ -256,12 +269,12 @@ class Editor(object):
             label="dfa_real_animate", underline=1, command=self.dfa_real_animate
         )
         functionmenu.add_separator()
-        functionmenu.add_command(
-            label="dfa_variable_create", underline=1, command=self.dfa_variable_createfinal
-        )
-        functionmenu.add_command(
-            label="dfa_variable_animate", underline=1, command=self.dfa_variable_animate
-        )
+        # functionmenu.add_command(
+        #     label="dfa_variable_create", underline=1, command=self.dfa_variable_createfinal
+        # )
+        # functionmenu.add_command(
+        #     label="dfa_variable_animate", underline=1, command=self.dfa_variable_animate
+        # )
         functionmenu.add_separator()
         functionmenu.add_command(
             label="dfa_comment_create", underline=1, command=self.dfa_comment_createfinal
@@ -443,6 +456,7 @@ class Editor(object):
                 states={"q0", "q1", "qD"},
                 input_symbols={"[A-Z] | [a-z]", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | ="},
                 transitions={
+
                     "q0": {"[A-Z] | [a-z]": "q1", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
                     "q1": {"[A-Z] | [a-z]": "qD", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
                     "qD": {"[A-Z] | [a-z]": "qD", "[0-9] |.| * |- | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
@@ -453,6 +467,7 @@ class Editor(object):
             )
             dfa.show_diagram(input_str=query_text, filename='Digraph', format_type="png", path="test-graphs",view=False)
 #string
+
     def dfa_string_create(self, query_text):
         dfa = VisualDFA(
             states={"q0", "q1", "q2", "qD"},
@@ -461,6 +476,7 @@ class Editor(object):
                 "q0":  {'\"': "q1", "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"},
                 "q1":  {'\"': "q2", "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =": "q1"},
                 "qD":  {'\"': "qD", "[A-Z] | [a-z] | [0-9] | * | - | + | / | ; | : | _ | % | ( | ) | < | > | =": "qD"}
+
             },
             initial_state="q0",
             final_states={"q2"},
@@ -470,64 +486,171 @@ class Editor(object):
 
 # Relational
     def dfa_relational_createfinal(self):
-        print()
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Operaters(O) : * | / | + | - \n")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | =")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_relational_create(query2)
+        relationaloperators = ['<', '=', '>']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in relationaloperators):
+                query3 = query3 + query2[i]
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_relational_create(query3)
+        self.draw_DFA()
 
     def dfa_relational_animate(self):
-        print()
+
+        alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+        alphabetsmall = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+        relationaloperators = ['<', '=', '>']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Operaters(O) : < | > | =  \n")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | * | / | + | -")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_relational_create(query)
+            self.draw_DFA()
+        self.relcounter += 1
+        if self.relcounter > (len(query)):
+            self.relcounter = 0
+        else:
+            quert = ""
+            for i in range(self.relcounter):
+                if (query[i] in relationaloperators):
+                    quert = quert + query[i]
+                    print(quert)
+                    self.dfa_relational_create(quert)
+                    self.draw_DFA()
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_relational_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_relational_animate()
 
 
-
-    def dfa_relational_create(self):
+    def dfa_relational_create(self, string_query):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "q4", "q5", "qD"},
-            input_symbols={"<", ">", "=", "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . "},
+            input_symbols={"<", ">", "=", "!"},
             transitions={
                 "q0": {"<": "q1", ">": "q3", "=": "q2",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
                 "q1": {"<": "qD", ">": "q4", "=": "q4",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
                 "q2": {"<": "qD", ">": "qD", "=": "qD",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
                 "q3": {"<": "qD", ">": "qD", "=": "q5",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
                 "q4": {"<": "qD", ">": "qD", "=": "qD",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
                 "q5": {"<": "qD", ">": "qD", "=": "qD",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
                 "qD": {"<": "qD", ">": "qD", "=": "qD",
-                       "[A-Z]|[a-z] | * | - | + | / | ; | : | _ | % | ( | ) | . ": "qD"},
+                       "!": "qD"},
 
             },
             initial_state="q0",
             final_states={"q1", "q2", "q3", "q4", "q5"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
-        self.draw_DFA()
+        dfa.show_diagram(input_str=string_query,filename='Digraph', format_type="png", path="test-graphs", view=False)
+
 # integer
     def dfa_integer_createfinal(self):
-        print()
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Numbers (N) : 0-9 \n")
+        self.diagrambox.insert(END, "Others(!) :  [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_arithmetic_create(query2)
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in nums):
+                query3 = query3 + 'N'
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_integer_create(query3)
+        self.draw_DFA()
 
     def dfa_integer_animate(self):
-    def dfa_integer_animate(self):
-    def dfa_integer_animate(self):
-        print()
+        alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        alphabetsmall = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        arthemticoperators = ['*', '/', '+', '-']
 
-    def dfa_integer_create(self):
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Numbers(N) : 0-9 \n")
+        self.diagrambox.insert(END, "Others(!): [A-Z] | [a-z] | . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_integer_create(query)
+            self.draw_DFA()
+        self.intcounter += 1
+        if self.intcounter > (len(query)):
+            self.intcounter = 0
+        else:
+            quert = ""
+            for i in range(self.intcounter):
+                if (query[i] in nums):
+                    quert = quert + 'N'
+                    print(quert)
+                    self.dfa_integer_create(quert)
+                    self.draw_DFA()
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_integer_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_integer_animate()
+
+
+
+    def dfa_integer_create(self, string_query):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "qD"},
-            input_symbols={"[0-9]", "[A-Za-z . * - + / ; : _ % ( ) < > = ]"},
+            input_symbols={"N", "!"},
             transitions={
-                "q0": {"[0-9]": "q1", "[A-Za-z . * - + / ; : _ % ( ) < > = ]": "qD"},
-                "q1": {"[0-9]": "q1", "[A-Za-z . * - + / ; : _ % ( ) < > = ]": "qD"},
-                "qD": {"[0-9]": "qD", "[A-Za-z . * - + / ; : _ % ( ) < > = ]": "qD"},
+                "q0": {"N": "q1", "!": "qD"},
+                "q1": {"N": "q1", "!": "qD"},
+                "qD": {"N": "qD", "!": "qD"},
 
             },
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(input_str=string_query,filename='Digraph', format_type="png", path="test-graphs", view=False)
 # real
     def dfa_real_createfinal(self):
         print()
@@ -538,90 +661,323 @@ class Editor(object):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "qD"},
-            input_symbols={"[0-9]", ".", "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | ="},
+            input_symbols={"N", ".", "!"},
             transitions={
-                "q0": {"[0-9]": "q1", ".": "qD",
-                       "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
-                "q1": {"[0-9]": "q1", ".": "q2",
-                       "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
-                "q2": {"[0-9]": "q3", ".": "qD",
-                       "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
-                "q3": {"[0-9]": "q3", ".": "qD",
-                       "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
-                "qD": {"[0-9]": "qD", ".": "qD",
-                       "[A-Z] | [a-z] | * |  - |  + |  / |  ; |  : |  _ |  % | ( | ) | < | > | =": "qD"},
+                "q0": {"N": "q1", ".": "qD",
+                       "!": "qD"},
+                "q1": {"N": "q1", ".": "q2",
+                       "!": "qD"},
+                "q2": {"N": "q3", ".": "qD",
+                       "!": "qD"},
+                "q3": {"N": "q3", ".": "qD",
+                       "!": "qD"},
+                "qD": {"N": "qD", ".": "qD",
+                       "!": "qD"},
 
             },
             initial_state="q0",
             final_states={"q3"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
-        self.draw_DFA()
+        dfa.show_diagram(input_str=query_string, filename='Digraph', format_type="png", path="test-graphs", view=False)
+
 # variable
     def dfa_value_createfinal(self):
-        print()
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Lowercase(a): a-z \n")
+        self.diagrambox.insert(END, "Uppercase & Numbers(Z): 0-9 A-Z \n")
+        self.diagrambox.insert(END,
+                               "Others(!): . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_value_create(query2)
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        uppercase = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in lowercase):
+                query3 = query3 + 'a'
+            elif (query2[i] in uppercase or query2[i] in nums):
+                query3 = query3 + 'Z'
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_value_create(query3)
+        self.draw_DFA()
 
     def dfa_value_animate(self):
-        print()
+        uppercase = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        arthemticoperators = ['*', '/', '+', '-']
 
-    def dfa_value_create(self):
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Lowercase(a): a-z \n")
+        self.diagrambox.insert(END, "Uppercase & Numbers(Z): 0-9 A-Z \n")
+        self.diagrambox.insert(END,
+                               "Others(!): . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_value_create(query)
+            self.draw_DFA()
+        self.valuecounter += 1
+        if self.valuecounter > (len(query)):
+            self.valuecounter = 0
+        else:
+            quert = ""
+            for i in range(self.valuecounter):
+                if (query[i] in lowercase):
+                    quert = quert + 'a'
+                    print(quert)
+                    self.dfa_value_create(quert)
+                    self.draw_DFA()
+                elif (query[i] in uppercase or query[i] in nums):
+                    quert = quert + 'Z'
+                    print(quert)
+                    self.dfa_value_create(quert)
+                    self.draw_DFA()
+
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_value_create(quert)
+                    self.draw_DFA()
+
+#            if (query2[i] in lowercase):
+#                 query3 = query3 + query2[i]
+#             elif (query2[i] in uppercase or query2[i] in nums):
+#                 query3 = query3 + query2[i]
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_value_animate()
+
+    def dfa_value_create(self, string_query):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "qD"},
-            input_symbols={"[a-z]", "[A-Z] | [0-9]", "[_ . * - + / ; :  % ( ) < > = ]"},
+            input_symbols={"a", "Z", "!"},
             transitions={
-                "q0": {"[a-z]": "q1", "[A-Z | [0-9]": "qD", "[_ . * - + / ; :  % ( ) < > = ]": "qD"},
-                "q1": {"[a-z]": "q1", "[A-Z | [0-9]": "q1", "[_ . * - + / ; :  % ( ) < > = ]": "qD"},
-                "qD": {"[a-z]": "qD", "[A-Z | [0-9]": "qD", "[_ . * - + / ; :  % ( ) < > = ]": "qD"},
+                "q0": {"a": "q1", "Z": "qD", "!": "qD"},
+                "q1": {"a": "q1", "Z": "q1", "!": "qD"},
+                "qD": {"a": "qD", "Z": "qD", "!": "qD"},
 
             },
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(input_str=string_query,filename='Digraph', format_type="png", path="test-graphs", view=False)
 
-    def dfa_predname_create(self):
+
+    def dfa_predname_createfinal(self):
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Lowercase(a) : a-z \n")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | [A-Z] | * | / | + | - | . | ; | : | _ | % | ( | ) | < | > | =")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_predname_create(query2)
+        lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in lowercase):
+                query3 = query3 + 'a'
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_predname_create(query3)
+        self.draw_DFA()
+
+    def dfa_predname_animate(self):
+
+        alphabetcaps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                        'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+        alphabetsmall = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                         't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+        lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                     't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Lowercase(a) : a-z \n")
+        self.diagrambox.insert(END, "Others(!) : [0-9] | [A-Z] | < | > | = | . | ; | : | _ | % | ( | ) | * | / | + | -")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_predname_create(query)
+            self.draw_DFA()
+        self.prednamecounter += 1
+        if self.prednamecounter > (len(query)):
+            self.prednamecounter = 0
+        else:
+            quert = ""
+            for i in range(self.prednamecounter):
+                if (query[i] in lowercase):
+                    quert = quert + 'a'
+                    print(quert)
+                    self.dfa_predname_create(quert)
+                    self.draw_DFA()
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_predname_create(quert)
+                    self.draw_DFA()
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_predname_animate()
+
+    def dfa_predname_create(self, query_string):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "qD"},
-            input_symbols={"[a-z]", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | ="},
+            input_symbols={"[a-z]", "!"},
             transitions={
-                "q0": {"[a-z]": "q1", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | =": "qD"},
-                "q1": {"[a-z]": "q1", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | =": "qD"},
-                "qD": {"[a-z]": "qD", "[A-Z] | [0-9] | _ | . | * | - | + | / | ; | : | % | ( | ) | < | > | =": "qD"},
+                "q0": {"a": "q1", "!": "qD"},
+                "q1": {"a": "q1", "!": "qD"},
+                "qD": {"a": "qD", "!": "qD"},
 
             },
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(input_str=query_string, filename='Digraph', format_type="png", path="test-graphs", view=False)
+#variable begad
+    def dfa_variable_createfinal(self):
+        # "_", "[A-Z]", "[a-z] | [0-9]",".| * | - | + | / | ; | : \ % | ( | ) | < | > | ="}
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Uppercase(A): A-Z \n")
+        self.diagrambox.insert(END, "Lowercase & Numbers(z): a-z 0-9 \n")
+        self.diagrambox.insert(END,
+                               "Others(!): .| * | - | + | / | ; | : \ % | ( | ) | < | > | =")
+        self.diagrambox.config(state=DISABLED)
+        query2 = self.legend.get(1.0, "end-1c")
+        if (query2 == ''):
+            self.dfa_variable_create(query2)
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        uppercase = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                     'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                     't', 'u', 'v', 'w', 'x', 'y', 'z']
+        query3 = ''
+        for i in range(len(query2)):
+            if (query2[i] in uppercase):
+                query3 = query3 + 'A'
 
-    def dfa_variable_create(self):
+            elif (query2[i] == '_'):
+                query3 = query3 + '_'
+
+            elif (query2[i] in lowercase or query2[i] in nums):
+                query3 = query3 + 'z'
+            else:
+                query3 = query3 + '!'
+
+        self.dfa_variable_create(query3)
+        self.draw_DFA()
+
+    def dfa_variable_animate(self):
+        uppercase = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                     'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        lowercase = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                     't', 'u', 'v', 'w', 'x', 'y', 'z']
+        nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+        arthemticoperators = ['*', '/', '+', '-']
+
+        self.diagrambox.config(state=NORMAL)
+        self.diagrambox.delete("1.0", END)
+        self.diagrambox.insert(END, "Uppercase(A): A-Z \n")
+        self.diagrambox.insert(END, "Lowercase & Numbers(z): a-z 0-9 \n")
+        self.diagrambox.insert(END,
+                               "Others(!): . | ; | : | _ | % | ( | ) | < | > | = | + | - | / | *")
+        self.diagrambox.config(state=DISABLED)
+        query = self.legend.get(1.0, "end-1c")
+        if (query == ''):
+            self.dfa_variable_create(query)
+            self.draw_DFA()
+        self.varcounter += 1
+        if self.varcounter > (len(query)):
+            self.varcounter = 0
+        else:
+            quert = ""
+            for i in range(self.varcounter):
+                if (query[i] in uppercase):
+                    quert = quert + 'A'
+                    print(quert)
+                    self.dfa_variable_create(quert)
+                    self.draw_DFA()
+
+                elif (query[i] == '_'):
+                    quert = quert + '_'
+                    print(quert)
+                    self.dfa_variable_create(quert)
+                    self.draw_DFA()
+
+
+                elif  (query[i] in lowercase or query[i] in nums):
+                    quert = quert + 'z'
+                    print(quert)
+                    self.dfa_variable_create(quert)
+                    self.draw_DFA()
+
+                else:
+                    quert = quert + '!'
+                    print(quert)
+                    self.dfa_variable_create(quert)
+                    self.draw_DFA()
+
+            #            if (query2[i] in lowercase):
+            #                 query3 = query3 + query2[i]
+            #             elif (query2[i] in uppercase or query2[i] in nums):
+            #                 query3 = query3 + query2[i]
+
+            time.sleep(0.8)
+            root.update()
+            self.dfa_variable_animate()
+
+    def dfa_variable_create(self, query_string):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "qD"},
-            input_symbols={"_", "[A-Z]", "[a-z] | [0-9]",".| * | - | + | / | ; | : \ % | ( | ) | < | > | ="},
+            input_symbols={"_", "A", "z", "!"},
             transitions={
-                "q0": {"_": "q2", "[A-Z]": "q1", "[a-z] | [0-9]": "qD",  ".| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
-                "q1": {"_": "q1", "[A-Z]": "q1", "[a-z] | [0-9]": "q1",  ".| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
-                "q2": {"_": "q2", "[A-Z]": "q1", "[a-z] | [0-9]": "q1",  ".| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
-                "qD": {"_": "qD", "[A-Z]": "qD", "[a-z] | [0-9]": "qD",  ".| * | - | + | / | ; | : \ % | ( | ) | < | > | = ": "qD"},
+
+                "q0": {"_": "q2", "A": "q1", "z": "qD",  "!": "qD"},
+                "q1": {"_": "q1", "A": "q1", "z": "q1",  "!": "qD"},
+                "q2": {"_": "q2", "A": "q1", "z": "q1",  "!": "qD"},
+                "qD": {"_": "qD", "A": "qD", "z": "qD",  "!": "qD"},
 
             },
             initial_state="q0",
             final_states={"q1"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(input_str=query_string, filename='Digraph', format_type="png", path="test-graphs", view=False)
 
     def dfa_special_create(self, query_text):
             dfa = VisualDFA(
                 states={"q0", "q1", "q2", "qD"},
-                input_symbols={"; | . | , | ( | )", ":","-","[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | ="},
+                input_symbols={"S", ":","-","[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | ="},
                 transitions={
-                    "q0": {"; | . | , | ( | )": "q1", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =":"qD" },
-                    "q1": {"; | . | , | ( | )": "qD", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =":"qD" },
-                    "q2": {"; | . | , | ( | )": "qD", ":": "qD", "-": "q2", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =":"qD" },
-                    "q0": {"; | . | , | ( | )": "qD", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
+                    "q0": {"S": "q1", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =":"qD" },
+                    "q1": {"S": "qD", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =":"qD" },
+                    "q2": {"S": "qD", ":": "qD", "-": "q2", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =":"qD" },
+                    "qD": {"S": "qD", ":": "qD", "-": "qD", "[A-Z] | [a-z] | [0-9] | * | + | / | _ | % | < | > | =": "qD"},
 
                 },
                 initial_state="q0",
@@ -640,22 +996,23 @@ class Editor(object):
         dfa = VisualDFA(
             # [A-Za-z . * - + / ; : _ % ( ) < > = ]   <= >= :- <>
             states={"q0", "q1", "q2", "q3", "q4", "q5", "q6" "qD"},
-            input_symbols={"%", "/", "*", "\n", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]"},
+            input_symbols={"%", "/", "*", "\n", "X"},
             transitions={
-                "q0": {"%": "q1", "/": "q3", "*": "qD", "\n": "q1", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "qD"},
-                "q1": {"%": "q1", "/": "q1", "*": "q1", "\n": "q2", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "q1"},
-                "q2": {"%": "q2", "/": "qD", "*": "qD", "\n": "q2", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "qD"},
-                "q3": {"%": "qD", "/": "qD", "*": "q4", "\n": "qD", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "qD"},
-                "q4": {"%": "q4", "/": "q4", "*": "q5", "\n": "q4", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "q4"},
-                "q5": {"%": "q4", "/": "q6", "*": "q5", "\n": "q4", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "q4"},
-                "q6": {"%": "q4", "/": "q4", "*": "q5", "\n": "q4", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "q4"},
-                "qD": {"%": "qD", "/": "qD", "*": "qD", "\n": "qD", "[A-Za-z 0-9 . - + ; :  ( ) < > = _]": "qD"},
+
+                "q0": {"%": "q1", "/": "q3", "*": "qD", "\n": "q1", "X": "qD"},
+                "q1": {"%": "q1", "/": "q1", "*": "q1", "\n": "q2", "X": "q1"},
+                "q2": {"%": "q2", "/": "qD", "*": "qD", "\n": "q2", "X": "qD"},
+                "q3": {"%": "qD", "/": "qD", "*": "q4", "\n": "qD", "X": "qD"},
+                "q4": {"%": "q4", "/": "q4", "*": "q5", "\n": "q4", "X": "q4"},
+                "q5": {"%": "q4", "/": "q6", "*": "q5", "\n": "q4", "X": "q4"},
+                "q6": {"%": "q4", "/": "q4", "*": "q5", "\n": "q4", "X": "q4"},
+                "qD": {"%": "qD", "/": "qD", "*": "qD", "\n": "qD", "X": "qD"},
 
             },
             initial_state="q0",
             final_states={"q2", "q6"},
         )
-        dfa.show_diagram(filename='Digraph', format_type="png", path="test-graphs", view=False)
+        dfa.show_diagram(input_str=query_string ,filename='Digraph', format_type="png", path="test-graphs", view=False)
 
     def run_query(self):
         """Interpret the entered rules and query and display the results in the
