@@ -78,7 +78,7 @@ ReservedWords = {":-": Token_type.If,
                 "predicates": Token_type.predicate,
                 "clauses": Token_type.clause,
                 "goal": Token_type.goal,
-                "int": Token_type.integer,
+                "integer": Token_type.integer,
                 "real": Token_type.real,
                 "string": Token_type.string,
                  "char": Token_type.char,
@@ -247,7 +247,7 @@ def find_token(text):
     # elif re.match("^[a-z A-Z][a-z A-Z 0-9]*[(][a-z A-Z 0-9]+(,[a-z A-Z 0-9]+)*[)]",word):
     #     print("is predicate")
     #     Tokens.append(token(word, Token_type.predicate))
-    elif re.match("^[a-z]+[(]$", word):
+    elif re.match("^[a-z]+[A-Z a-z]*[(]$", word):
         print("is predicate name")
         word=word[:-1]
         Tokens.append(token(word, Token_type.predicate_name))
@@ -340,13 +340,14 @@ def Prey(j) :
             output["index"] =  Y_dict["index"]
             return output
         else:
-            Y_dict = Y(j)
+            out4 = Match(Token_type.space, j)
+            Y_dict = Y(out4["index"])
             children.append(Y_dict["node"])
       
             #children.append(out4["node"])
             Node = Tree('Prey', children)
             output["node"] = Node
-            output["index"] = out4["index"]
+            output["index"] = Y_dict["index"]
             return output
     else:
         Y_dict = Y(j)
@@ -472,7 +473,7 @@ def Data(j):
         output["index"] = out["index"]
         return output
 
-                              #############################################  Clause
+                              ####################################  Clause
 def Clause(j):
     output = dict()
     children = []
@@ -513,7 +514,7 @@ def Cx(j):
         output["node"] = Node
         output["index"] = Cxy_dict["index"]
         return output
-    else:
+    elif(Temp['token_type'] == Token_type.If):
         out = Match(Token_type.If, j)
         children.append(out["node"])
         B_dict = B(out["index"])
@@ -996,6 +997,13 @@ def Operator(j):
         output["node"] = Node
         output["index"] = out["index"]
         return output
+    elif(Temp['token_type'] == Token_type.AssignOp):
+        out = Match(Token_type.AssignOp, j)
+        children.append(out["node"])
+        Node = Tree('Operator', children)
+        output["node"] = Node
+        output["index"] = out["index"]
+        return output
     else:
         out = Match(Token_type.PlusOp, j)
         children.append(out["node"])
@@ -1059,7 +1067,7 @@ def Expressionx(j):
     output = dict()
     children = []
     Temp = Tokens[j+1].to_dict()
-    if(Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp):
+    if(Temp['token_type']==Token_type.PlusOp or Temp['token_type']==Token_type.MinusOp or Temp['token_type']==Token_type.MultiplyOp or Temp['token_type']==Token_type.DivideOp or Temp['token_type']==Token_type.AssignOp):
         Expression_dict=Expression(j)
         children.append(Expression_dict["node"])
         Node = Tree('Expressionx', children)
@@ -1171,8 +1179,7 @@ def Comment(j):
         return output
 
 
-
-                                  ###################################   Goal
+                           ###################################   Goal
 def Goal(j):
     output=dict()
     children=[]
@@ -1223,6 +1230,41 @@ def G(j):
         output["node"] = Node
         output["index"] = out["index"]
         return output
+def Gp(j):
+    output=dict()
+    children=[]
+    if (j < len(Tokens)):
+        temp = Tokens[j].to_dict()
+        if (temp['token_type'] == Token_type.predicate_name):
+            G_dict=G(j)
+            children.append(G_dict["node"])
+            Node = Tree('Gp', children)
+            output["node"] = Node
+            output["index"] = G_dict["index"]
+            return output
+        elif(temp['token_type'] == Token_type.value):
+            G_dict = G(j)
+            children.append(G_dict["node"])
+            Node = Tree('Gp', children)
+            output["node"] = Node
+            output["index"] = G_dict["index"]
+            return output #one sec
+
+        else:
+            children.append("Epsilon")
+            Node = Tree('Gp', children)
+            output["node"] = Node
+            output["index"] = j
+            return output
+    else:
+        children.append("Epsilon")
+        Node = Tree('Gp', children)
+        output["node"] = Node
+        output["index"] = j
+        return output
+
+
+
 def Gpy(j):
     output = dict()
     children = []
@@ -1237,16 +1279,20 @@ def Gpy(j):
             children.append(out2["node"])
             out3 = Match(Token_type.End, out2["index"])
             children.append(out3["node"])
+            Gp_dict=Gp(out3["index"])
+            children.append(Gp_dict["node"])
             Node = Tree('Gpy', children)
             output["node"] = Node
-            output["index"] = out3["index"]
+            output["index"] = Gp_dict["index"]
             return output
         elif(temp['token_type'] == Token_type.End):
             out3 = Match(Token_type.End, j)
             children.append(out3["node"])
+            Gp_dict = Gp(out3["index"])
+            children.append(Gp_dict["node"])
             Node = Tree('Gpy', children)
             output["node"] = Node
-            output["index"] = out3["index"]
+            output["index"] = Gp_dict["index"]
             return output
         else:
             out1 = Match(Token_type.openBracket, j)
@@ -1375,7 +1421,7 @@ def Match(a, j):
             #         break
             # j=v
             output["node"] = ["error"]
-            output["index"] = j + 1
+            output["index"] = j+1
             errors.append("Syntax error : " + Temp['Lex'] + " Expected dot")
             return output
     else:
