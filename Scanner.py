@@ -845,7 +845,7 @@ def BuiltFunction(j):
         out2 = Match(Token_type.word, out1["index"])
         children.append(out2["node"])
         Parameter_dict = Parameter(out2["index"])
-        children.append(Parameter_dict["node"])                              ######## need more words
+        children.append(Parameter_dict["node"])
         out3 = Match(Token_type.word,Parameter_dict["index"])
         children.append(out3["node"])
         out4 = Match(Token_type.closeBracket, out3["index"])
@@ -1233,35 +1233,12 @@ def G(j):
 def Gp(j):
     output=dict()
     children=[]
-    if (j < len(Tokens)):
-        temp = Tokens[j].to_dict()
-        if (temp['token_type'] == Token_type.predicate_name):
-            G_dict=G(j)
-            children.append(G_dict["node"])
-            Node = Tree('Gp', children)
-            output["node"] = Node
-            output["index"] = G_dict["index"]
-            return output
-        elif(temp['token_type'] == Token_type.value):
-            G_dict = G(j)
-            children.append(G_dict["node"])
-            Node = Tree('Gp', children)
-            output["node"] = Node
-            output["index"] = G_dict["index"]
-            return output #one sec
+    children.append("Error")
+    Node = Tree('Gp', children)
+    output["node"] = Node
+    output["index"] = j
+    return output
 
-        else:
-            children.append("Epsilon")
-            Node = Tree('Gp', children)
-            output["node"] = Node
-            output["index"] = j
-            return output
-    else:
-        children.append("Epsilon")
-        Node = Tree('Gp', children)
-        output["node"] = Node
-        output["index"] = j
-        return output
 
 
 
